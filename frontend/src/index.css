@@ -1,68 +1,230 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@import "tailwindcss";
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --background: rgb(0 0% 100%);
+    --foreground: rgb(222.2 84% 4.9%);
+    --card: rgb(0 0% 100%);
+    --card-foreground: rgb(222.2 84% 4.9%);
+    --popover: rgb(0 0% 100%);
+    --popover-foreground: rgb(222.2 84% 4.9%);
+    --primary: rgb(222.2 47.4% 11.2%);
+    --primary-foreground: rgb(210 40% 98%);
+    --secondary: rgb(210 40% 96.1%);
+    --secondary-foreground: rgb(222.2 47.4% 11.2%);
+    --muted: rgb(210 40% 96.1%);
+    --muted-foreground: rgb(215.4 16.3% 46.9%);
+    --accent: rgb(210 40% 96.1%);
+    --accent-foreground: rgb(222.2 47.4% 11.2%);
+    --destructive: rgb(0 84.2% 60.2%);
+    --destructive-foreground: rgb(210 40% 98%);
+    --border: rgb(214.3 31.8% 91.4%);
+    --input: rgb(214.3 31.8% 91.4%);
+    --ring: rgb(222.2 84% 4.9%);
+    --radius: 0.5rem;
+    --sidebar-background: rgb(0 0% 98%);
+    --sidebar-foreground: rgb(240 5.3% 26.1%);
+    --sidebar-primary: rgb(240 5.9% 10%);
+    --sidebar-primary-foreground: rgb(0 0% 98%);
+    --sidebar-accent: rgb(240, 4.8, 95);
+    --sidebar-accent-foreground: rgb(240 5.9% 10%);
+    --sidebar-border: rgb(220 13% 91%);
+    --sidebar-ring: rgb(217.2 91.2% 59.8%);
+
+    --krevelance-dark: rgb(0, 0, 0);
+    --krevelance-primary: rgb(15, 206, 124);
+    --krevelance-primary-light: rgb(15, 206, 150);
+    --krevelance-accent: rgb(15, 206, 100);
+    --krevelance-dark-card: rgb(15, 47, 15);
+    --krevelance-dark-card-new:rgba(24, 24, 24, 0.61);
+    --krevelance-dark-card-hover: rgba(29, 29, 29, 0.8);
   }
-  a:hover {
-    color: #747bff;
+
+  .dark {
+    --background: rgb(222.2 84% 4.9%);
+    --foreground: rgb(210 40% 98%);
+    --card: rgb(222.2 84% 4.9%);
+    --card-foreground: rgb(210 40% 98%);
+    --popover: rgb(222.2 84% 4.9%);
+    --popover-foreground: rgb(210 40% 98%);
+    --primary: rgb(210 40% 98%);
+    --primary-foreground: rgb(222.2 47.4% 11.2%);
+    --secondary: rgb(217.2, 32.6%, 17.5%);
+    --secondary-foreground: rgb(210 40% 98%);
+    --muted: rgb(217.2 32.6% 17.5%);
+    --muted-foreground: rgb(215 20.2% 65.1%);
+    --accent: rgb(217.2 32.6% 17.5%);
+    --accent-foreground: rgb(210 40% 98%);
+    --destructive: rgb(0 62.8% 30.6%);
+    --destructive-foreground: rgb(210 40% 98%);
+    --border: rgb(217.2 32.6% 17.5%);
+    --input: rgb(217.2 32.6% 17.5%);
+    --ring: rgb(212.7 26.8% 83.9%);
+
+    --sidebar-background: rgb(240 5.9% 10%);
+    --sidebar-foreground: rgb(240 4.8% 95.9%);
+    --sidebar-primary: rgb(224.3 76.3% 48%);
+    --sidebar-primary-foreground: rgb(0 0% 100%);
+    --sidebar-accent: rgb(240 3.7% 15.9%);
+    --sidebar-accent-foreground: rgb(240 4.8% 95.9%);
+    --sidebar-border: rgb(240 3.7% 15.9%);
+    --sidebar-ring: rgb(217.2 91.2% 59.8%);
   }
-  button {
-    background-color: #f9f9f9;
+
+
+
+  body {
+    @apply bg-black text-white font-sans antialiased;
   }
+  span{
+    @apply text-[var(--krevelance-primary)];
+  }
+
+  h1,h2,h3,h4,h5,h6 {
+    @apply font-sans font-medium tracking-tight ;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components { 
+  .glass-card {
+    @apply bg-[var(--krevelance-dark-card-new)] backdrop-blur-xs  shadow-lg; 
+  }
+
+  .glass-card-hover {
+    @apply hover:bg-[var(--krevelance-dark-card-hover)] transition-all duration-300 hover:shadow-xl; 
+  }
+
+  .glass-input {
+    @apply bg-black/20 border border-white/10 focus:border-[var(--krevelance-primary)] focus:ring focus:ring-[var(--krevelance-primary)]/50 text-white placeholder:text-gray-400;
+  }
+
+  .btn-primary {
+    @apply px-3 py-2  text-black font-medium rounded-sm hover:bg-[var(--krevelance-primary-light)] transition-all duration-300 focus:outline-hidden focus:ring focus:ring-[var(--krevelance-primary)]/50 focus:ring-offset-2 focus:ring-offset-[var(--krevelance-dark)];
+  }
+
+  .btn-secondary {
+    @apply px-3 py-2 bg-[var(--krevelance-accent)] text-white font-medium rounded-sm transition-all duration-300 focus:outline-hidden focus:ring focus:ring-[var(--krevelance-accent)]/50 focus:ring-offset-2 focus:ring-offset-[var(--krevelance-dark)] hover:bg-[var(--krevelance-accent)]/80;
+  }
+
+  .btn-tertiary {
+    @apply text-[var(--krevelance-primary-light)] font-medium rounded-sm transition-colors duration-200 hover:text-[var(--krevelance-accent)];
+}
+
+  .btn-outline {
+    @apply px-6 py-3 border border-[var(--krevelance-primary)] text-[var(--krevelance-primary)] font-medium rounded-sm hover:bg-[rgba(var(--krevelance-primary),0.1)] transition-all duration-300 focus:outline-hidden focus:ring focus:ring-[var(--krevelance-primary)]/50 focus:ring-offset-2 focus:ring-offset-[var(--krevelance-dark)];
+  }
+
+  .headings-gradient {
+    @apply bg-gradient-to-r from-[var(--krevelance-primary)] to-[var(--krevelance-primary-light)] bg-clip-text text-transparent;
+  }
+
+  .page-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  .section-container {
+    @apply w-full max-w-6xl mx-auto px-4 py-12 md:py-16;
+  }
+
+  .glossy-card {
+    @apply bg-[rgba(var(--krevelance-dark-card),0.9)] backdrop-blur-sm border border-white/5 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .glossy-gradient {
+    @apply bg-gradient-to-br from-[var(--krevelance-dark-card)] via-[var(--krevelance-dark-card)] to-black border border-white/5;
+  }
+
+  .glossy-button {
+    @apply bg-[var(--krevelance-primary)] hover:bg-[var(--krevelance-primary-light)] text-black font-medium rounded-sm transition-all duration-300 ; 
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 206, 124, 0.5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 206, 124, 0.7);
+}
+
+a,
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--krevelance-primary);
+  outline-offset: 2px;
+}
+
+.glossy-orb {
+  background: radial-gradient(circle at 30% 30%, rgba(15, 206, 124, 0.4), rgba(15, 206, 124, 0.1) 70%);
+  filter: blur(50px);
+  opacity: 0.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 100;
+}
+
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%); 
+  }
+}
+
+.animate-progress-line {
+  animation: progress 3s linear forwards;
 }
