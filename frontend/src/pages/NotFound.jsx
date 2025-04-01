@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import Navbar from '../components/layout/Navbar'
+import Navbar2 from '../components/layout/Navbar2'
 
 const NotFound = () => {
   const location = useLocation();
@@ -20,7 +20,7 @@ const NotFound = () => {
   return (
   
     <div className="min-h-screen flex flex-col items-center justify-center text-white p-4">
-       <Navbar/>
+       <Navbar2/>
       <div className="text-center max-w-md mx-auto">
         <h1 className="text-7xl font-bold mb-4 text-[#0FCE7C]">404</h1>
         <p className="text-2xl mb-6">Oops! Page not found</p>

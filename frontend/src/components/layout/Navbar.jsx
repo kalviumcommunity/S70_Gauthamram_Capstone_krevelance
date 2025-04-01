@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-// import { Button } from "@/components/ui/button";
+
 import { Menu, X, ChevronRight } from "lucide-react";
 
 const Navbar = () => {
@@ -87,7 +87,7 @@ const Navbar = () => {
                   className="btn-primary btn-secondary hover:scale-105 hover:text-white text-black flex"
                 >
                   Sign up
-                  <ChevronRight className="ml-1 mt-1 h-4 w-4 hover:text-white text-black" />
+                  <ChevronRight className="ml-1 mt-1 h-4 w-4 hover:text-white text-black hover:texte-white" />
                 </NavLink>
               </div>
             ) : (

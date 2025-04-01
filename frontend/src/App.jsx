@@ -6,6 +6,13 @@ import Index from "./pages/index";
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Dashboard from './pages/Dashboard';
+import Pricing from './pages/Pricing';
+import About from './pages/About';
+import Reports from './pages/Reports';
+import Analysis from './pages/Analysis';
+import Upload from './pages/Upload';
+
 
 const queryClient = new QueryClient();
 
@@ -16,13 +23,16 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* <Route path="/about" element={<About />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/analysis" element={<Analysis />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/upload" element={<Upload />} />
-            <Route path="/settings" element={<Settings />} />*/}
+            {/*
+            
+            <Route path="/settings" element={<Settings />} />*
+            <Route path="/settings" element={<notification />} />*/}
+            <Route path="/upload" element={<Upload/>} />
+             <Route path="/analysis" element={<Analysis/>}/>
+             <Route path="/reports" element={<Reports/>} />
+             <Route path="/about" element={<About/>} />
+             <Route path="/pricing" element={<Pricing/>} />
+             <Route path="/dashboard" element={<Dashboard />} />
              <Route path="/signup" element={<Signup/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="*" element={<NotFound/>} /> 

@@ -76,7 +76,7 @@ const Landing = () => {
 
   return (
     <Layout>
-      <section className="relative min-h-[90vh] flex items-center">
+      <section className="relative min-h-[90vh] flex items-center max-w-7xl mx-auto">
         <div className="container mx-auto px-4 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-10">
             <div className="lg:w-1/2 space-y-6">
@@ -99,7 +99,7 @@ const Landing = () => {
                   className="bg-[#0FCE7C] p-3 font-semibold text-base text-black hover:scale-105 rounded-xl   flex items-center justify-center "
                   onClick={() => navigate("/signup")}
                 >
-                  Start Free Trial <ChevronRight className="mt-1" />
+                  Get Started <ChevronRight className="mt-1" />
                 </button>
 
               </div>
@@ -111,7 +111,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 max-w-7xl mx-auto">
         <div className="w-1/9 mb-4  mx-auto">
           <h2 className="px-3 py-1  rounded-full bg-[#0F2F0F] text-sm font-medium text-[#0FCE7C]">
             Key Features
@@ -138,7 +138,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-black">
+      <section className="py-20 bg-black max-w-7xl mx-auto">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row  items-center justify-between glass-card p-8 md:p-12 rounded-xl overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-r from-[#0F2F0F] to-black opacity-50 z-0"></div>
