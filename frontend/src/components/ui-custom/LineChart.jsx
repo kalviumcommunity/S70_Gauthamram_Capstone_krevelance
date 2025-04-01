@@ -1,14 +1,5 @@
 import { useMemo } from "react";
-import {
-  LineChart as RechartsLineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-} from "recharts";
+import {LineChart as RechartsLineChart,Line,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,Area,} from "recharts";
 
 const LineChart = ({
   data,
