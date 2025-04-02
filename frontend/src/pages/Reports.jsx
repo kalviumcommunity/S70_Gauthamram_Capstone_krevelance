@@ -423,7 +423,7 @@ const Reports = () => {
 
                         >
                             <SelectTrigger
-                                className="w-[180px] glass-input bg-[#232323] transition-all duration-300 "
+                                className="w-[180px] glass-input bg-[#474747] transition-all duration-300 "
 
                                 onClick={() => setIsSelectOpen(!isSelectOpen)}
                             >
@@ -453,7 +453,7 @@ const Reports = () => {
                 </div>
 
                 <div className="mt-8">
-                    <div className="flex space-x-8 mb-8  bg-[#F1F1F1] rounded-lg p-2 w-fit ">
+                    <div className="flex space-x-8 mb-8  bg-[#333333] rounded-lg p-2 w-fit ">
                         <button
                             className={`px-4 py-2 hover:bg-black hover:text-white hover:scale-105 rounded-md transition-all duration-300 ${activeTab === 'all' ? 'bg-[#0FCE7C] text-black' : 'bg-[#FDFDFD] text-black'}`}
                             onClick={() => setActiveTab('all')}
