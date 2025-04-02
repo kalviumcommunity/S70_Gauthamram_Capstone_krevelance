@@ -12,6 +12,8 @@ import About from './pages/About';
 import Reports from './pages/Reports';
 import Analysis from './pages/Analysis';
 import Upload from './pages/Upload';
+import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
 
 
 const queryClient = new QueryClient();
@@ -23,11 +25,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/*
-            
-            <Route path="/settings" element={<Settings />} />*
-            <Route path="/settings" element={<notification />} />*/}
             <Route path="/upload" element={<Upload/>} />
+            <Route path="/settings" element={<Settings />}/>
              <Route path="/analysis" element={<Analysis/>}/>
              <Route path="/reports" element={<Reports/>} />
              <Route path="/about" element={<About/>} />
@@ -35,6 +34,8 @@ const App = () => {
              <Route path="/dashboard" element={<Dashboard />} />
              <Route path="/signup" element={<Signup/>} />
             <Route path="/login" element={<Login/>} />
+            <Route path="/notification" element={<Notifications/>} />
+
             <Route path="*" element={<NotFound/>} /> 
           </Routes>
         </BrowserRouter>

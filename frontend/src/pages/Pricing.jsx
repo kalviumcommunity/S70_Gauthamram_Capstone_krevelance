@@ -174,7 +174,7 @@ const Pricing = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left  ">
           <PricingCard
             title="Basic"
-            price={isAnnual ? '₹79' : '₹129'}
+            price={isAnnual ? '₹399' : '₹699'}
             description="Perfect for startups and small businesses"
             features={basicFeatures}
             buttonText="Start"
@@ -182,7 +182,7 @@ const Pricing = () => {
 
           <PricingCard
             title="Professional"
-            price={isAnnual ? '₹159' : '₹299'}
+            price={isAnnual ? '₹799' : '₹999'}
             description="Ideal for growing businesses and teams"
             features={proFeatures}
             buttonText="Start"
@@ -191,7 +191,7 @@ const Pricing = () => {
 
           <PricingCard
             title="Enterprise"
-            price={isAnnual ? '₹259' : '₹499'}
+            price={isAnnual ? '₹1999' : '₹2399'}
             description="For organizations with complex needs"
             features={enterpriseFeatures}
             buttonText="start"
