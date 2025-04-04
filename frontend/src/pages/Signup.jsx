@@ -41,37 +41,38 @@ const Signup = () => {
     }
   }, [email]);
 
-  // Real-time password validation
+
   useEffect(() => {
+    let error = "";
     if (password) {
-      let error = "";
       if (password.length < 8) {
         error = "Password must be at least 8 characters";
-      } else if (!/(?=.*[A-Z])/.test(password)) {
+      } else if (password.length > 20) {
+        error = "Password must be at most 20 characters";
+      }
+      else if (!/(?=.*[A-Z])/.test(password)) {
         error = "Password must contain a capital letter";
       } else if (!/(?=.*\d)/.test(password)) {
         error = "Password must contain a number";
       } else if (!/(?=.*[!@#$%^&*])/.test(password)) {
         error = "Password must contain a special character";
       }
-      setPasswordError(error);
-    } else {
-      setPasswordError("");
     }
+    setPasswordError(error);
   }, [password]);
 
   //Real-time confirm password validation
-    useEffect(() => {
-        if (confirmPassword) {
-            if (confirmPassword !== password) {
-                setConfirmPasswordError("Passwords do not match");
-            } else {
-                setConfirmPasswordError("");
-            }
-        } else {
-            setConfirmPasswordError("");
-        }
-    }, [confirmPassword, password]);
+  useEffect(() => {
+    if (confirmPassword) {
+      if (confirmPassword !== password) {
+        setConfirmPasswordError("Passwords do not match");
+      } else {
+        setConfirmPasswordError("");
+      }
+    } else {
+      setConfirmPasswordError("");
+    }
+  }, [confirmPassword, password]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +104,11 @@ const Signup = () => {
     } else if (password.length < 8) {
       setPasswordError("Password must be at least 8 characters");
       hasErrors = true;
-    } else if (!/(?=.*[A-Z])/.test(password)) {
+    } else if (password.length > 20) {
+      setPasswordError("Password must be less than 20 characters");
+      hasErrors = true;
+    }
+    else if (!/(?=.*[A-Z])/.test(password)) {
       setPasswordError("Password must contain a capital letter");
       hasErrors = true;
     } else if (!/(?=.*\d)/.test(password)) {
@@ -200,6 +205,7 @@ const Signup = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    maxLength={20} 
                     className="glass-input bg-white text-black w-full mt-3 rounded-lg h-10 pr-10"
                   />
                   <button
@@ -227,6 +233,7 @@ const Signup = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                    maxLength={20} 
                     className="glass-input bg-white text-black w-full mt-3 rounded-lg h-10 pr-10"
                   />
                   <button
@@ -304,7 +311,7 @@ const Signup = () => {
                   </svg>
                   Google
                 </button>
-                
+
               </div>
             </form>
           </div>
@@ -315,3 +322,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
