@@ -205,16 +205,6 @@ const Pricing = () => {
             </h3>
 
             <div className="space-y-6">
-              <div>
-                <h4 className="text-lg font-medium text-white mb-2">
-                  What is included in the free trial?
-                </h4>
-                <p className="text-gray-400">
-                  All plans include a 14-day free trial with full access to all
-                  features within that plan. No credit card required until the
-                  trial period ends.
-                </p>
-              </div>
 
               <div>
                 <h4 className="text-lg font-medium text-white mb-2">
@@ -233,7 +223,7 @@ const Pricing = () => {
                   What payment methods do you accept?
                 </h4>
                 <p className="text-gray-400">
-                  We accept all major credit cards, PayPal, and bank transfers for
+                  We accept PayPal, and Razor pay for
                   annual plans. Enterprise plans can also be paid via invoice.
                 </p>
               </div>
@@ -244,8 +234,7 @@ const Pricing = () => {
                 </h4>
                 <p className="text-gray-400">
                   We use bank-level encryption and security protocols to protect
-                  your data. All information is encrypted at rest and in transit
-                  using industry-standard methods.
+                  your data. All information is encrypted.
                 </p>
               </div>
             </div>
