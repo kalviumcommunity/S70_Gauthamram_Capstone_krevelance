@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Layout from "../components/layout/Layout";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+ import { Link, useNavigate } from "react-router-dom";
+ import Layout from "../components/layout/Layout";
+ import { FaEye, FaEyeSlash } from "react-icons/fa";
+ import axios from "axios";
 
-const Signup = () => {
+ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +22,6 @@ const Signup = () => {
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 
-  // Real-time email validation
   useEffect(() => {
     if (email) {
       if (!email.includes("@")) {
@@ -61,7 +61,7 @@ const Signup = () => {
     setPasswordError(error);
   }, [password]);
 
-  //Real-time confirm password validation
+
   useEffect(() => {
     if (confirmPassword) {
       if (confirmPassword !== password) {
@@ -100,7 +100,6 @@ const Signup = () => {
     if (!password) {
       setPasswordError("Please enter a password");
       hasErrors = true;
-      hasErrors = true;
     } else if (password.length < 8) {
       setPasswordError("Password must be at least 8 characters");
       hasErrors = true;
@@ -128,7 +127,7 @@ const Signup = () => {
     }
 
     if (!agreeTerms) {
-      setAgreeTermsError("You must agree to the terms and conditions");
+      setAgreeTermsError("You must agree to the Terms of Service and Privacy Policy");
       hasErrors = true;
     }
 
@@ -138,11 +137,20 @@ const Signup = () => {
 
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await axios.post("http://localhost:1316/api/auth/signup", {
+        name,
+        email,
+        password,
+        agreeTerms
+      });
       setIsLoading(false);
-      alert("You have successfully signed up. Welcome to krevelance!");
+      alert(res.data.message);
       navigate("/dashboard");
-    }, 1500);
+    } catch (err) {
+      setIsLoading(false);
+      alert(err.response?.data?.error || "An error occurred during signup.");
+    }
   };
 
   return (
@@ -205,7 +213,7 @@ const Signup = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    maxLength={20} 
+                    maxLength={20}
                     className="glass-input bg-white text-black w-full mt-3 rounded-lg h-10 pr-10"
                   />
                   <button
@@ -233,7 +241,7 @@ const Signup = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    maxLength={20} 
+                    maxLength={20}
                     className="glass-input bg-white text-black w-full mt-3 rounded-lg h-10 pr-10"
                   />
                   <button
@@ -298,10 +306,11 @@ const Signup = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-4  ">
+              <a href="http://localhost:1316/api/auth/google">
                 <button
                   type="button"
-                  className="bg-transparent border-white/10 hover:bg-white/10 text-white py-2 rounded-md transition-colors duration-300 flex items-center justify-center"
+                  className=" hover:bg-white hover:text-black bg-[#414141] text-white p-3 w-95 rounded-md transition-colors duration-300 flex items-center justify-center"
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
@@ -311,7 +320,7 @@ const Signup = () => {
                   </svg>
                   Google
                 </button>
-
+                </a>
               </div>
             </form>
           </div>
@@ -319,7 +328,6 @@ const Signup = () => {
       </div>
     </Layout>
   );
-};
+ };
 
-export default Signup;
-
+ export default Signup;

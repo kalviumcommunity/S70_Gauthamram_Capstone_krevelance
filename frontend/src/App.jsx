@@ -14,6 +14,7 @@ import Analysis from './pages/Analysis';
 import Upload from './pages/Upload';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import AuthCallback from './pages/AuthCallback';
 
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => {
              <Route path="/signup" element={<Signup/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/notification" element={<Notifications/>} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
             <Route path="*" element={<NotFound/>} /> 
           </Routes>

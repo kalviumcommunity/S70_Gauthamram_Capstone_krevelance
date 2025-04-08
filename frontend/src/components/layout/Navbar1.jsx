@@ -12,7 +12,6 @@ const KrevelanceText = () => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
         };
-
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -22,26 +21,34 @@ const KrevelanceText = () => {
     }, [location.pathname]);
 
     const getButtonStyle = (path) => {
-        return `flex items-center justify-center text-sm rounded-lg h-9 w-30 hover:scale-105
-      ${activePath === path
-                ? 'bg-[#0FCE7C] text-black' // Active button style
-                : 'bg-white text-black border hover:border-white hover:text-white hover:bg-black' // Inactive button style
-            }`;
+
+        return `flex items-center justify-center text-sm rounded-lg h-9 px-4 hover:scale-105 w-full md:w-auto whitespace-nowrap ${
+            activePath === path
+                ? 'bg-[#0FCE7C] text-black font-semibold'
+                : 'bg-white text-black border hover:border-white hover:text-white hover:bg-black' 
+        }`;
     };
+
+     const getIconButtonSyle = (path = '') => {
+         return `flex items-center justify-center text-white hover:scale-105 hover:bg-white hover:text-black rounded-full h-9 w-9 self-center md:self-auto flex-shrink-0 ${ // Added flex-shrink-0
+             activePath === path ? 'bg-white/20' : ''
+         }`;
+     };
+
 
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-                ? "py-3 bg-krevelance-dark/80 backdrop-blur-lg shadow-md"
-                : "py-5 bg-transparent"
+                    ? "py-3 bg-krevelance-dark/80 backdrop-blur-lg shadow-md"
+                    : "py-5 bg-transparent"
                 }`}
         >
             <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center">
-                    <NavLink to="/dashboard" className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold">Krevelance</span>
+                <div className="flex justify-between items-center"> 
+                    <NavLink to="/dashboard" className="flex items-center space-x-2 flex-shrink-0">
+                        <span className={`text-2xl text-[#0FCE7C] font-bold`}>Krevelance</span>
                     </NavLink>
-                    <div className="flex space-x-3 items-center">
+                    <div className="flex flex-col space-y-2 items-stretch md:flex-row md:space-y-0 md:space-x-3 md:items-center">
                         <button
                             className={getButtonStyle('/dashboard')}
                             onClick={() => navigate('/dashboard')}
@@ -49,7 +56,6 @@ const KrevelanceText = () => {
                             <Home className="mr-2 h-3 w-3" />
                             Dashboard
                         </button>
-
                         <button
                             className={getButtonStyle('/reports')}
                             onClick={() => navigate('/reports')}
@@ -57,7 +63,6 @@ const KrevelanceText = () => {
                             <BookOpen className="mr-2 h-3 w-3" />
                             View Reports
                         </button>
-
                         <button
                             className={getButtonStyle('/analysis')}
                             onClick={() => navigate('/analysis')}
@@ -72,23 +77,23 @@ const KrevelanceText = () => {
                             <Upload className="mr-2 h-3 w-3" />
                             Upload
                         </button>
-
                         <button
-                            className="flex items-center justify-center text-white hover:scale-105 hover:bg-white  hover:text-black rounded-full  h-9 w-9"
+                            className={getIconButtonSyle('/notification')}
                             onClick={() => navigate('/notification')}
+                             aria-label="Notifications"
                         >
                             <Bell className="h-5 w-5 " />
                         </button>
-
                         <button
-                            className="flex items-center justify-center text-white hover:scale-105 hover:bg-white hover:text-black rounded-full  h-9 w-9"
-                            onClick={() => navigate('/Settings')}
+                            className={getIconButtonSyle('/settings')}
+                            onClick={() => navigate('/settings')}
+                             aria-label="User Settings"
                         >
                             <User className="h-5 w-5" />
                         </button>
+                    </div> 
 
-                    </div>
-                </div>
+                </div> 
             </div>
         </nav>
     );
