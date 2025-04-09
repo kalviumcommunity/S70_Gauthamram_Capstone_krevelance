@@ -30,8 +30,8 @@ const KrevelanceText = () => {
     };
 
      const getIconButtonSyle = (path = '') => {
-         return `flex items-center justify-center text-white hover:scale-105 hover:bg-white hover:text-black rounded-full h-9 w-9 self-center md:self-auto flex-shrink-0 ${ // Added flex-shrink-0
-             activePath === path ? 'bg-white/20' : ''
+         return `flex items-center justify-center text-white hover:scale-105 hover:bg-white hover:text-black rounded-full h-9 w-9 self-center md:self-auto flex-shrink-0 ${ 
+             activePath === path ? 'bg-[#0FCE7C]' : ''
          }`;
      };
 
