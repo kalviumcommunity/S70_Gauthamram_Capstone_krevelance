@@ -55,7 +55,7 @@ JWT & OAuth (Authentication)
 FastAPI (Python) for AI Processing
 Gemini 1.5 (AI Financial Insights)
 Deployment & DevOps:
-Vercel (Frontend)
+netlify (Frontend)
 Render (Backend)
  Development Timeline (4 Weeks)
 Week 1: Core Setup & Authentication
@@ -113,7 +113,7 @@ Day 24-26: Beta Testing & UI Enhancements
 🔹 Ensure Mobile Responsiveness
 🔹 Improve UI/UX Based on Feedback
 Day 27-28: Deployment & Open Source Contributions
-🔹 Deploy Frontend to Vercel
+🔹 Deploy Frontend to netlify
 🔹 Deploy Backend to Render
 🔹 Submit Project to GitHub & Open Source Contributions
 

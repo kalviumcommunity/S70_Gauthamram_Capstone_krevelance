@@ -51,12 +51,7 @@ const Settings = () => {
     countryCode: "",
   });
 
-  const [security, setSecurity] = useState({
-    twoFactorAuth: false,
-    sessionTimeout: 30,
-    passwordUpdated: "2023-05-15",
-    loginAlerts: true,
-  });
+
 
   const [plans, setPlans] = useState([
     {
@@ -129,12 +124,7 @@ const Settings = () => {
     console.log("Password updated");
   };
 
-  const handleUpdateSecurity = () => {
-    alert(
-      "Security settings updated!\nYour security preferences have been saved."
-    );
-    console.log("Updated security:", security);
-  };
+
 
   const handleChangePlan = (planId) => {
     const planToUpdate = plans.find((plan) => plan.id === planId);
@@ -214,20 +204,7 @@ const Settings = () => {
                 </div>
               </button>
 
-              <button
-                className={
-                  "w-full justify-start gap-2 mb-2 rounded-md" +
-                  (activeTab === "security"
-                    ? " bg-[#0FCE7C]/30 text-[#0FCE7C]"
-                    : " hover:bg-gray-800/50 text-white")
-                }
-                onClick={() => setActiveTab("security")}
-              >
-                <div className="flex p-3">
-                  <Shield className="mr-4" />
-                  <p className="text-lg -mt-1 text-left">Security</p>
-                </div>
-              </button>
+
             </div>
           </div>
 
@@ -592,146 +569,6 @@ const Settings = () => {
                   <button className="hover:bg-white text-black hover:scale-105 bg-[#0FCE7C] rounded-md px-4 py-2">
                     Add Payment Method
                   </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "security" && (
-              <div className="mt-0 space-y-6">
-                <div className="glass-card p-6 rounded-lg text-left">
-                  <h2 className="text-3xl font-semibold mb-6 text-white">
-                    Security Settings
-                  </h2>
-
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-white">
-                            Two-Factor Authentication
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Add an extra layer of security to your account
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            value=""
-                            className="sr-only peer"
-                            checked={security.twoFactorAuth}
-                            onChange={(e) =>
-                              setSecurity({
-                                ...security,
-                                twoFactorAuth: e.target.checked,
-                              })
-                            }
-                          />
-                          <div className="w-11 h-6 bg-white peer-focus:outline-none   rounded-full peer  peer-checked:after:translate-x-full  after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#000000] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#0FCE7C] "></div>
-                        </label>
-                      </div>
-
-                      <hr className="bg-white/10" />
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-white">
-                            Session Timeout
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Automatically log out after a period of inactivity
-                            (minutes)
-                          </p>
-                        </div>
-                        <button
-                          variant="outline"
-                          size="sm"
-                          className={`border-white/10 p-2 rounded-lg ${
-                            security.sessionTimeout === 15
-                              ? "bg-[#0FCE7C]/30 text-[#0FCE7C]"
-                              : "text-white"
-                          }`}
-                          onClick={() =>
-                            setSecurity({ ...security, sessionTimeout: 15 })
-                          }
-                        >
-                          15 minutes
-                        </button>
-                        <button
-                          variant="outline"
-                          size="sm"
-                          className={`border-white/10 p-2 rounded-lg ${
-                            security.sessionTimeout === 30
-                              ? "bg-[#0FCE7C]/30 text-[#0FCE7C]"
-                              : "text-white"
-                          }`}
-                          onClick={() =>
-                            setSecurity({ ...security, sessionTimeout: 30 })
-                          }
-                        >
-                          30 minutes
-                        </button>
-                        <button
-                          variant="outline"
-                          size="sm"
-                          className={`border-white/10 p-2 rounded-lg ${
-                            security.sessionTimeout === 60
-                              ? "bg-[#0FCE7C]/30 text-[#0FCE7C]"
-                              : "text-white"
-                          }`}
-                          onClick={() =>
-                            setSecurity({ ...security, sessionTimeout: 60 })
-                          }
-                        >
-                          1 hour
-                        </button>
-                      </div>
-
-                      <hr className="bg-white/10" />
-
-                      <div className="flex">
-                        <p className="font-medium text-white">
-                          Password Updated
-                        </p>
-                        <p className="text-sm mt-1 ml-166 text-gray-400">
-                          {security.passwordUpdated}
-                        </p>
-                      </div>
-
-                      <hr className="bg-white/10" />
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-white">Login Alerts</p>
-                          <p className="text-sm text-gray-400">
-                            Receive notifications for new logins to your account
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            value=""
-                            className="sr-only peer"
-                            checked={security.loginAlerts}
-                            onChange={(e) =>
-                              setSecurity({
-                                ...security,
-                                loginAlerts: e.target.checked,
-                              })
-                            }
-                          />
-                          <div className="w-11 h-6 bg-white peer-focus:outline-none   rounded-full peer  peer-checked:after:translate-x-full  after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#000000] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#0FCE7C]"></div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <button
-                      className="bg-[#0FCE7C] hover:scale-105 hover:bg-[#0FCE96] text-black rounded-md px-4 py-2 mt-6"
-                      onClick={handleUpdateSecurity}
-                    >
-                      Save Security Settings
-                    </button>
-                  </div>
                 </div>
               </div>
             )}

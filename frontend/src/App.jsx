@@ -14,6 +14,7 @@ import Analysis from './pages/Analysis';
 import Upload from './pages/Upload';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import SelectSector from './pages/SelectSector';
 import AuthCallback from './pages/AuthCallback';
 
 
@@ -34,6 +35,7 @@ const App = () => {
              <Route path="/pricing" element={<Pricing/>} />
              <Route path="/dashboard" element={<Dashboard />} />
              <Route path="/signup" element={<Signup/>} />
+             <Route path="/select-sector" element={<SelectSector/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/notification" element={<Notifications/>} />
             <Route path="/auth/callback" element={<AuthCallback />} />

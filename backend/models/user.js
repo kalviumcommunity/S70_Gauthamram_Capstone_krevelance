@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const ALLOWED_SECTORS = ['Agriculture', 'Tech/SaaS', 'Retail', 'Manufacturing', 'Other'];
+
 const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, "Please provide a name"],
+      trim: true, 
     },
     email: {
       type: String,
@@ -15,14 +18,28 @@ const UserSchema = new mongoose.Schema(
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
         "Please provide a valid email",
       ],
-      lowercase: true,
+      lowercase: true, 
+      trim: true,
     },
     password: {
       type: String,
-      required: [true, "Please provide a password"],
+      required: function() { return !this.googleId; }, 
       select: false,
     },
+    businessSector: { 
+        type: String,
+        required: [true, "Please select your business sector"],
+        enum: {
+            values: ALLOWED_SECTORS,
+            message: 'Invalid business sector selected. Please choose from the provided list.'
+        }
+    },
     lastLogin: { type: Date },
+    tier: {
+      type: String,
+      enum: ['free', 'pro', 'enterprise'],
+      default: 'free'
+    },
   },
   {
     timestamps: true,
@@ -30,7 +47,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (!this.isModified("password") || !this.password) {
     return next();
   }
 
@@ -44,7 +61,9 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+   if (!this.password) return false; 
+   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 module.exports = mongoose.model("User", UserSchema);
+module.exports.ALLOWED_SECTORS = ALLOWED_SECTORS; 

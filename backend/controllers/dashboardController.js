@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/user');
 const Order = require('../models/Order'); 
 const Expense = require('../models/Expense'); 
+const { generateFinancialInsights, generateDetailedAIRecommendations } = require('../services/aiAnalysisService');
 
 const getDashboardData = asyncHandler(async (req, res) => {
     const now = new Date();

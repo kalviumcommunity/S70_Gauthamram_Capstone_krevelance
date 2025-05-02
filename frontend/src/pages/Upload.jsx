@@ -36,16 +36,27 @@ const Upload = () => {
     const [uploadProgress, setUploadProgress] = useState({});
     const [uploadStatus, setUploadStatus] = useState({});
     const fileInputRef = useRef(null);
-    const dropZoneRef = useRef(null); // Ref for the drop zone
-
+    const dropZoneRef = useRef(null); 
+ 
     const handleFileChange = (e) => {
+
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
             handleNewFiles(newFiles);
         }
     };
-
+    const MAX_FILE_SIZE_MB = 10
     const handleNewFiles = (newFiles) => {
+        const filteredFiles = newFiles.filter(file => file.size / 1024 / 1024 <= MAX_FILE_SIZE_MB);
+        const rejectedFiles = newFiles.filter(file => file.size / 1024 / 1024 > MAX_FILE_SIZE_MB);
+        
+        if (rejectedFiles.length > 0) {
+        alert("Some files were too large and not added.");
+         }
+
+         const uniqueNewFiles = newFiles.filter(
+         (newFile) => !files.some((existingFile) => existingFile.name === newFile.name)
+        );
         const newProgress = { ...uploadProgress };
         const newStatus = { ...uploadStatus };
 
@@ -169,7 +180,9 @@ const Upload = () => {
                     </div>
 
                     {files.length > 0 && (
+                        
                         <div className="mb-6">
+                        
                             <h3 className="text-lg font-medium text-white mb-4">Selected Files ({files.length})</h3>
                             <div className="space-y-3">
                                 {files.map((file, index) => (
@@ -219,6 +232,7 @@ const Upload = () => {
                         </div>
                     )}
 
+
                     <div className="flex justify-between items-center">
                         <button
                             variant="outline"
@@ -227,6 +241,16 @@ const Upload = () => {
                             disabled={uploading}
                         >
                             Add More Files
+                        </button>
+                        <button 
+                        className="text-sm bg-red-600 hover:scale-105 px-2 h-10 text-white rounded-lg -ml-110 mt-1"
+                        onClick={() => {
+                        setFiles([]);
+                         setUploadProgress({});
+                         setUploadStatus({});
+                         }}
+                        >
+                         Clear All Files
                         </button>
 
                         <button
