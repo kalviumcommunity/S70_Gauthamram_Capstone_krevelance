@@ -27,10 +27,9 @@ const NotFound = () => {
         <p className="text-gray-400 mb-8">
           The page you're looking for doesn't exist or has been removed.
         </p>
-        <Link to="/">
-          <button
-            className="bg-[#0FCE7C] hover:bg-[#0FCE7C] text-black px-6 py-2 rounded-md transition-colors duration-200"
-          >
+        <Link to="/">       
+        <button
+            className="bg-[#0FCE7C] hover:bg-[#0FCE7C] text-black px-6 py-2 rounded-md transition-colors duration-200" >
             Return to Home
           </button>
         </Link>

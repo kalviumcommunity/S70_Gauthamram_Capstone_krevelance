@@ -18,9 +18,15 @@ const Landing = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
+
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const data = [
     { name: "Jan", value: 4000 },
