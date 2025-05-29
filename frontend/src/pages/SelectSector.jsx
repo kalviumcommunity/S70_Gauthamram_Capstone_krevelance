@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from '../api/axiosConfig'
 import Layout from "../components/layout/Layout";
 import { GiFarmTractor } from "react-icons/gi";
 import { FaQuestion, FaIndustry, FaStore, FaLaptopCode } from "react-icons/fa";

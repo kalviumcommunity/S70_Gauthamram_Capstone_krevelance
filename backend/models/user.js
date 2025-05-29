@@ -5,6 +5,9 @@ const ALLOWED_SECTORS = ['Agriculture', 'Tech/SaaS', 'Retail', 'Manufacturing', 
 
 const UserSchema = new mongoose.Schema(
   {
+    deleteAccountToken: { type: String },
+    deleteAccountExpires: { type: Date },
+
     name: {
       type: String,
       required: [true, "Please provide a name"],
@@ -20,12 +23,22 @@ const UserSchema = new mongoose.Schema(
       ],
       lowercase: true, 
       trim: true,
+      canChange: { type: Boolean, default: false } 
     },
     password: {
       type: String,
-      required: function() { return !this.googleId; }, 
-      select: false,
+     required: function() {
+      return !this.googleId;
     },
+    minlength: 8,
+    select: false,
+    },
+    googleId: {
+    type: String,
+    unique: true,
+    sparse: true 
+  },
+    
     businessSector: { 
         type: String,
         required: [true, "Please select your business sector"],
@@ -34,11 +47,67 @@ const UserSchema = new mongoose.Schema(
             message: 'Invalid business sector selected. Please choose from the provided list.'
         }
     },
+
+
     lastLogin: { type: Date },
     tier: {
       type: String,
       enum: ['free', 'pro', 'enterprise'],
       default: 'free'
+    },
+     company: {
+        type: String,
+        trim: true,
+        default: '',
+    },
+    phone: {
+        type: String,
+        trim: true,
+        default: '',
+    },
+    address: {
+        street: { type: String, trim: true, default: '' },
+        city: { type: String, trim: true, default: '' },
+        state: { type: String, trim: true, default: '' },
+        zip: { type: String, trim: true, default: '' },
+        country: { type: String, trim: true, default: '' }, 
+       
+    },
+
+
+    //BILLING
+    currentPlan: {
+        type: String,
+        enum: ['free', 'pro', 'enterprise', null], 
+        default: 'free', 
+    },
+    razorpayCustomerId: { 
+        type: String,
+        trim: true,
+    },
+    razorpaySubscriptionId: { 
+        type: String,
+        trim: true,
+    },
+    subscriptionStatus: {
+        type: String,
+        enum: ['active', 'inactive', 'cancelled', 'past_due', null],
+        default: null,
+    },
+    nextBillingDate: {
+        type: Date,
+    },
+    profileLockedFields: {
+        name: { type: Boolean, default: false }, 
+        email: { type: Boolean, default: true }, 
+      },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
     },
   },
   {

@@ -1,7 +1,7 @@
 const Report = require('../models/Report'); 
 const fs = require('fs').promises;
 const path = require('path');
-const { generateFinancialInsights, generateDetailedAIRecommendations } = require('../services/aiAnalysisService');
+
 
 exports.getAllReports = async (req, res) => {
     try {

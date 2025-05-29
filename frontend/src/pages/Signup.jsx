@@ -299,7 +299,7 @@ const Signup = () => {
                                 <a href="http://localhost:1316/api/auth/google">
                                     <button
                                         type="button"
-                                        className="w-full hover:bg-gray-200 hover:text-black bg-[#333] text-white p-3 rounded-md transition-colors duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-400" 
+                                        className="hover:bg-white hover:text-black bg-[#414141] text-white py-2 px-4 -mt-7 rounded-md transition-colors duration-300 flex items-center justify-center font-medium w-full" 
                                     >
                                         <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" aria-hidden="true"> 
                                             <path
