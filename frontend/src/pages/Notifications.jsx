@@ -116,17 +116,17 @@ const Notifications = () => {
       <div className="mt-8 space-y-6">
         <div className="flex flex-wrap justify-between items-start sm:items-center gap-4">
           <div className="flex flex-wrap gap-5">
-            {['all', 'market', 'subscription', 'report', 'login', 'data'].map(cat => (
+            {['all', 'market', 'subscription',  'report', 'login', 'data'].map(cat => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setFilter(cat)}
                 className={`flex items-center rounded-lg p-2 transition-all duration-200 ${
-                  filter === cat ? 'bg-[#0FCE7C] text-white scale-105' : 'bg-[#565656] text-gray-300 hover:bg-[#0FCE7C]/30 hover:text-white'
+                  filter === cat ? 'bg-[#0FCE7C]/30 text-[#0fce7c] scale-105' : 'bg-[#565656] text-white  hover:text-white'
                 }`}
               >
                 {getIconByCategory(cat)}
-                <span className="ml-1 capitalize">{cat}</span>
+                <div className="ml-1 capitalize">{cat}</div>
                 {cat === 'all' && unreadCount > 0 && (
                   <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs leading-tight">
                     {unreadCount}

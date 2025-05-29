@@ -16,6 +16,7 @@ import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import SelectSector from './pages/SelectSector';
 import AuthCallback from './pages/AuthCallback';
+import ConfirmDeleteAccountPage from './pages/ConfirmDeleteAccountPage';
 
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="/notification" element={<Notifications/>} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
+            <Route path="/confirm-delete-account" element={<ConfirmDeleteAccountPage/>} />
             <Route path="*" element={<NotFound/>} /> 
           </Routes>
         </BrowserRouter>

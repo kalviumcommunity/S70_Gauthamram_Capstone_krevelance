@@ -1,25 +1,29 @@
-const asyncHandler = require('express-async-handler'); 
+const asyncHandler = require('express-async-handler');
 const User = require('../models/user');
-const Order = require('../models/Order'); 
-const Expense = require('../models/Expense'); 
-const { generateFinancialInsights, generateDetailedAIRecommendations } = require('../services/aiAnalysisService');
+const Order = require('../models/Order');
+const Expense = require('../models/Expense');
+const { predictRetainedUsers } = require('../services/aiAnalysisService');
 
 const getDashboardData = asyncHandler(async (req, res) => {
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30)); 
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
+    const startOfMonth = new Date(currentYear, currentMonth, 1);
+    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+    const startOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
+    const endOfLastMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const [
         totalRevenueData,
         totalExpensesData,
         monthlyRevenueData,
         monthlyExpensesData,
-        activeUsersCount,
+        activeUsersCount, 
         revenueLastMonthData,
         expensesLastMonthData
     ] = await Promise.all([
@@ -33,30 +37,20 @@ const getDashboardData = asyncHandler(async (req, res) => {
         ]),
         Order.aggregate([
             { $match: { createdAt: { $gte: startOfYear, $lte: endOfYear } } },
-            {
-                $group: {
-                    _id: { month: { $month: '$createdAt' } }, 
-                    monthlyTotal: { $sum: '$amount' }
-                }
-            },
+            { $group: { _id: { month: { $month: '$createdAt' } }, monthlyTotal: { $sum: '$amount' } } },
             { $sort: { '_id.month': 1 } }
         ]),
-         Expense.aggregate([
+        Expense.aggregate([
             { $match: { createdAt: { $gte: startOfYear, $lte: endOfYear } } },
-            {
-                $group: {
-                    _id: { month: { $month: '$createdAt' } }, 
-                    monthlyTotal: { $sum: '$amount' }
-                }
-            },
-             { $sort: { '_id.month': 1 } }
+            { $group: { _id: { month: { $month: '$createdAt' } }, monthlyTotal: { $sum: '$amount' } } },
+            { $sort: { '_id.month': 1 } }
         ]),
         User.countDocuments({ lastLogin: { $gte: thirtyDaysAgo } }),
-         Order.aggregate([
+        Order.aggregate([
             { $match: { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ]),
-         Expense.aggregate([
+        Expense.aggregate([
             { $match: { createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
             { $group: { _id: null, total: { $sum: '$amount' } } }
         ])
@@ -70,13 +64,14 @@ const getDashboardData = asyncHandler(async (req, res) => {
     const expensesLastMonth = expensesLastMonthData.length > 0 ? expensesLastMonthData[0].total : 0;
     const profitLastMonth = revenueLastMonth - expensesLastMonth;
 
-    const revenueThisMonth = monthlyRevenueData.find(m => m._id.month === (now.getMonth() + 1))?.monthlyTotal || 0;
-    const expensesThisMonth = monthlyExpensesData.find(m => m._id.month === (now.getMonth() + 1))?.monthlyTotal || 0;
+    const currentMonthIndex = new Date().getMonth() + 1; 
+    const revenueThisMonth = monthlyRevenueData.find(m => m._id.month === currentMonthIndex)?.monthlyTotal || 0;
+    const expensesThisMonth = monthlyExpensesData.find(m => m._id.month === currentMonthIndex)?.monthlyTotal || 0;
     const profitThisMonth = revenueThisMonth - expensesThisMonth;
 
     const calculateChange = (current, previous) => {
-        if (previous === 0) return current > 0 ? 100 : 0; 
-        return (((current - previous) / previous) * 100).toFixed(1); 
+        if (previous === 0) return current > 0 ? 100 : 0;
+        const change = ((current - previous) / previous) * 100;
     };
 
     const revenueChange = calculateChange(revenueThisMonth, revenueLastMonth);
@@ -88,34 +83,50 @@ const getDashboardData = asyncHandler(async (req, res) => {
         const monthData = monthlyRevenueData.find(item => item._id.month === index + 1);
         return { name, value: monthData ? monthData.monthlyTotal : 0 };
     });
-     const profitChart = monthNames.map((name, index) => {
+    const profitChart = monthNames.map((name, index) => {
         const revenue = monthlyRevenueData.find(item => item._id.month === index + 1)?.monthlyTotal || 0;
         const expenses = monthlyExpensesData.find(item => item._id.month === index + 1)?.monthlyTotal || 0;
         return { name, value: revenue - expenses };
     });
 
+    const historicalSummaryForAI = {
+        totalRevenueYTD: totalRevenue,
+        totalExpensesYTD: totalExpenses,
+        netProfitYTD: netProfit,
+        avgMonthlyRevenue: monthlyRevenueData.length > 0 ? (monthlyRevenueData.reduce((sum, m) => sum + m.monthlyTotal, 0) / monthlyRevenueData.length) : 0,
+        avgMonthlyProfit: profitChart.length > 0 ? (profitChart.reduce((sum, m) => sum + m.value, 0) / profitChart.length) : 0,
+    };
+
+    const predictionTimeframe = '3m' || '6m' || '1y'; 
+
+    const predictedRetainedUsersValue = await predictRetainedUsers(
+        historicalSummaryForAI,
+        activeUsersCount, 
+        predictionTimeframe
+    );
 
     const responseData = {
-         stats: {
+        stats: {
             totalRevenue: {
                 value: totalRevenue,
-                change: parseFloat(revenueChange),
+                change: revenueChange,
                 trend: revenueChange >= 0 ? 'up' : 'down'
             },
             totalExpenses: {
                 value: totalExpenses,
-                change: parseFloat(expensesChange),
-                trend: expensesChange >= 0 ? 'up' : 'down'
+                change: expensesChange,
+                trend: expensesChange <= 0 ? 'down' : 'up' 
             },
             netProfit: {
                 value: netProfit,
-                change: parseFloat(profitChange),
+                change: profitChange,
                 trend: profitChange >= 0 ? 'up' : 'down'
             },
             activeUsers: {
-                value: activeUsersCount,
-                change: 0,
-                trend: 'neutral'
+                value: predictedRetainedUsersValue, 
+                change: null, 
+                trend: null,
+                predictionTimeframe: `${predictionTimeframe === '3m' || '6m' || '1y' ? '3 Months' || '6 Months' || '1 Year' : predictionTimeframe}` // Add context
             }
         },
         charts: {
@@ -128,5 +139,5 @@ const getDashboardData = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  getDashboardData,
+    getDashboardData,
 };

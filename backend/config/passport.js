@@ -1,5 +1,3 @@
-// ... (rest of app.js code above) ...
-
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const LocalStrategy = require("passport-local").Strategy;
@@ -18,14 +16,10 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // --- ADD THIS LINE ---
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
-      // --- END ADDITION ---
       session: false,
-      // --- ADD THIS LINE (Matches what's used in authRoutes) ---
       passReqToCallback: true,
-      // --- END ADDITION ---
-    }, // Added 'req' parameter here as passReqToCallback is true
+    }, 
     async (req, accessToken, refreshToken, profile, done) => {
       try {
         const existingUser = await User.findOne({
@@ -33,7 +27,6 @@ passport.use(
         });
 
         if (existingUser) {
-          // Optional: Update Google profile info or add googleId if missing
           if (!existingUser.googleId) {
             existingUser.googleId = profile.id;
             await existingUser.save();

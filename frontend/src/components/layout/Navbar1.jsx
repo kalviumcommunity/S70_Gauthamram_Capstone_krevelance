@@ -25,7 +25,7 @@ const KrevelanceText = () => {
         return `flex items-center justify-center text-sm rounded-lg h-9 px-4 hover:scale-105 w-full md:w-auto whitespace-nowrap ${
             activePath === path
                 ? 'bg-[#0FCE7C] text-black font-semibold'
-                : 'bg-white text-black border hover:border-white hover:text-white hover:bg-black' 
+                : 'bg-white text-black hover:bg-[#0FCE7C]/30 hover:text-[#0FCE7C]' 
         }`;
     };
 
