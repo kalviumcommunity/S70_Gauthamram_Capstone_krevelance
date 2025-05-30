@@ -313,7 +313,7 @@ const requestAccountDeletion = async (req, res) => {
     const websiteName = "Krevelance"; 
     const emailSubject = `Confirm Your Account Deletion - ${websiteName}`;
     const userName = user.name;
-    const mainMessage = `You recently requested to delete your ${websiteName} account. To confirm this action and permanently delete your account, please click the button below.`;
+    const mainMessage = `You recently requested to delete your ${websiteName} account. Confirm to permanently delete your account, please click the button below.`;
     const linkText = "Confirm Account Deletion";
     const expiryInfo = "This confirmation link is valid for 1 hour.";
     const footerText = `If you did not request this action, please ignore this email. Your account will remain safe.`;
@@ -405,7 +405,7 @@ const dashboardprofile = async (req, res) => {
     console.error("Error fetching user name for dashboard header:", error);
     res
       .status(500)
-      .json({ success: false, message: "Server Error fetching user name." });
+      .json({ success: false, message: "Server Error: Problem with fetching user name." });
   }
 };
 
