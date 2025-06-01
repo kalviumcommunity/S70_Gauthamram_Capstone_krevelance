@@ -100,7 +100,7 @@ const updateProfileSettings = async (req, res) => {
   } catch (error) {
     console.error("Error updating profile settings:", error); 
     res.status(500).json({
-      message: "Server error updating profile.",
+      message: "Server error in updating profile.",
       error: error.message,
     });
   }
@@ -206,7 +206,7 @@ const requestAccountDeletion = async (req, res) => {
       user.deleteAccountExpires = undefined;
       try {
         await user.save();
-        console.log(`Cleaned up deletion token for user ${user._id} after error.`);
+        console.log(`Cleaned up delete token for user ${user._id} after error.`);
       } catch (saveErr) {
         console.error("Error cleaning up user token after failed deletion request:", saveErr);
       }
