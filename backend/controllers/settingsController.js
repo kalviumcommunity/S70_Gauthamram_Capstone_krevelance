@@ -112,17 +112,17 @@ const updatePassword = async (req, res) => {
   if (!currentPassword || !newPassword || !confirmNewPassword) {
     return res
       .status(400)
-      .json({ message: "Please provide all password fields." });
+      .json({ message: "Please provide all password fields" });
   }
 
   if (newPassword !== confirmNewPassword) {
-    return res.status(400).json({ message: "New passwords do not match." });
+    return res.status(400).json({ message: "New passwords don't match." });
   }
 
   if (newPassword.length < 8) {
     return res
       .status(400)
-      .json({ message: "New password must be at least 8 characters long." });
+      .json({ message: "New password must be at least 8 characters." });
   }
 
   try {
@@ -682,6 +682,5 @@ module.exports = {
   confirmAccountDeletion,
   dashboardprofile,
  handleRazorpayWebhook,
- handleDeletePaymentMethodController,
  getBillingDetails,
 };

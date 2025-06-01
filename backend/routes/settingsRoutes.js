@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { protect } = require('../middleware/authMiddleware');
 const {getProfileSettings,updateProfileSettings,updatePassword,requestAccountDeletion,confirmAccountDeletion, dashboardprofile,
-      getBillingInfo, handleSubscriptionChange, handleRazorpayWebhook, handleDeletePaymentMethodController
+      getBillingInfo, handleSubscriptionChange, handleRazorpayWebhook, 
     // createSubscription, 
     // cancelSubscription, 
     // getInvoices,
