@@ -138,7 +138,7 @@ const Notifications = () => {
           <button
             type="button"
             onClick={markAllAsRead}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+            className="bg-[#0FCE7C]/40 text-[#0FCE7C] hover:scale-105 px-4 py-2 rounded-lg hover:bg-[#ce0f0f] hover:text-[#ffffff] "
           >
             Mark All as Read
           </button>

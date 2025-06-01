@@ -91,7 +91,7 @@ const UserSchema = new mongoose.Schema(
     },
     subscriptionStatus: {
         type: String,
-        enum: ['active', 'inactive', 'cancelled', 'past_due', null],
+        enum: ['created', 'active', 'inactive', 'cancelled', 'past_due', null],
         default: null,
     },
     nextBillingDate: {

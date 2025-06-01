@@ -24,14 +24,14 @@ const KrevelanceText = () => {
 
         return `flex items-center justify-center text-sm rounded-lg h-9 px-4 hover:scale-105 w-full md:w-auto whitespace-nowrap ${
             activePath === path
-                ? 'bg-[#0FCE7C] text-black font-semibold'
-                : 'bg-white text-black hover:bg-[#0FCE7C]/30 hover:text-[#0FCE7C]' 
+                ? 'bg-[#0FCE7C]/40 text-[#0FCE7C] '
+                : 'bg-[#2b2b2b] text-white hover:bg-white hover:text-black' 
         }`;
     };
 
-     const getIconButtonSyle = (path = '') => {
-         return `flex items-center justify-center text-white hover:scale-105 hover:bg-white hover:text-black rounded-full h-9 w-9 self-center md:self-auto flex-shrink-0 ${ 
-             activePath === path ? 'bg-[#0FCE7C]' : ''
+     const getIconButtonSyle = (path ) => {
+         return `flex items-center justify-center text-white hover:scale-105  rounded-full h-9 w-9 self-center md:self-auto flex-shrink-0 ${ 
+             activePath === path ? 'bg-[#0FCE7C]/40 text-[#0FCE7C] ' : 'bg-[#2b2b2b] text-white '
          }`;
      };
 
@@ -82,14 +82,14 @@ const KrevelanceText = () => {
                             onClick={() => navigate('/notification')}
                              aria-label="Notifications"
                         >
-                            <Bell className="h-5 w-5 " />
+                            <Bell className="text-[#0FCE7C] h-5 w-5 " />
                         </button>
                         <button
                             className={getIconButtonSyle('/settings')}
                             onClick={() => navigate('/settings')}
                              aria-label="User Settings"
                         >
-                            <User className="h-5 w-5" />
+                            <User className="text-[#0FCE7C] h-5 w-5" />
                         </button>
                     </div> 
 
