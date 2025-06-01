@@ -439,7 +439,7 @@ const Settings = () => {
     }
     if (passwordData.newPassword.length < 6) {
       showCustomToast(
-        "New password must be at least 6 characters long.",
+        "New password must be at least 8 characters long.",
         "warning"
       );
       setIsPasswordLoading(false);
@@ -456,8 +456,7 @@ const Settings = () => {
         }
       );
       const data = response.data;
-      showCustomToast(
-        data.message || "Password updated successfully!",
+      showCustomToast( data.message || "Password updated successfully!",
         "success"
       );
       setPasswordData({
@@ -473,7 +472,6 @@ const Settings = () => {
           "Failed to update password.",
         "error"
       );
-      console.error("Failed to update password:", err.response?.data || err);
     } finally {
       setIsPasswordLoading(false);
     }
