@@ -10,52 +10,91 @@ import {
   Eye,
   EyeOff,
   LogOut,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 import Navbar1 from "../components/layout/Navbar1";
 
-
-
 const COUNTRIES_LIST = [
-    { name: "Choose your country" },
-    { name: "Argentina", code: "AR", phoneCode: "+54" },
-    { name: "Australia", code: "AU", phoneCode: "+61" },
-    { name: "Brazil", code: "BR", phoneCode: "+55" },
-    { name: "Canada", code: "CA", phoneCode: "+1" },
-    { name: "China", code: "CN", phoneCode: "+86" },
-    { name: "France", code: "FR", phoneCode: "+33" },
-    { name: "Germany", code: "DE", phoneCode: "+49" },
-    { name: "India", code: "IN", phoneCode: "+91" },
-    { name: "Italy", code: "IT", phoneCode: "+39" },
-    { name: "Japan", code: "JP", phoneCode: "+81" },
-    { name: "Mexico", code: "MX", phoneCode: "+52" },
-    { name: "Netherlands", code: "NL", phoneCode: "+31" },
-    { name: "Nigeria", code: "NG", phoneCode: "+234" },
-    { name: "Russia", code: "RU", phoneCode: "+7" },
-    { name: "South Africa", code: "ZA", phoneCode: "+27" },
-    { name: "South Korea", code: "KR", phoneCode: "+82" },
-    { name: "Spain", code: "ES", phoneCode: "+34" },
-    { name: "Switzerland", code: "CH", phoneCode: "+41" },
-    { name: "United Kingdom", code: "GB", phoneCode: "+44" },
-    { name: "United States", code: "US", phoneCode: "+1" },
-  ];
+  { name: "Choose your country" },
+  { name: "Argentina", code: "AR", phoneCode: "+54" },
+  { name: "Australia", code: "AU", phoneCode: "+61" },
+  { name: "Brazil", code: "BR", phoneCode: "+55" },
+  { name: "Canada", code: "CA", phoneCode: "+1" },
+  { name: "China", code: "CN", phoneCode: "+86" },
+  { name: "France", code: "FR", phoneCode: "+33" },
+  { name: "Germany", code: "DE", phoneCode: "+49" },
+  { name: "India", code: "IN", phoneCode: "+91" },
+  { name: "Italy", code: "IT", phoneCode: "+39" },
+  { name: "Japan", code: "JP", phoneCode: "+81" },
+  { name: "Mexico", code: "MX", phoneCode: "+52" },
+  { name: "Netherlands", code: "NL", phoneCode: "+31" },
+  { name: "Nigeria", code: "NG", phoneCode: "+234" },
+  { name: "Russia", code: "RU", phoneCode: "+7" },
+  { name: "South Africa", code: "ZA", phoneCode: "+27" },
+  { name: "South Korea", code: "KR", phoneCode: "+82" },
+  { name: "Spain", code: "ES", phoneCode: "+34" },
+  { name: "Switzerland", code: "CH", phoneCode: "+41" },
+  { name: "United Kingdom", code: "GB", phoneCode: "+44" },
+  { name: "United States", code: "US", phoneCode: "+1" },
+];
+
+const Toast = ({ message, type, onClose }) => {
+  const bgColor = {
+    success: "bg-green-600",
+    error: "bg-red-600",
+    warning: "bg-yellow-600",
+    info: "bg-blue-600",
+  }[type || "info"];
+
+  const Icon = {
+    success: Check,
+    error: X,
+    warning: AlertTriangle,
+    info: null,
+  }[type || "info"];
+
+  return (
+    <div
+      className={`${bgColor} text-white px-4 py-3 rounded-md shadow-lg flex items-center justify-between transition-all duration-300 ease-in-out fixed bottom-4 left-1/2 -translate-x-1/2 z-50`}
+      style={{ minWidth: "250px" }}
+    >
+      <div className="flex items-center text-white">
+        {Icon && <Icon className="w-5 h-5 mr-2" />}
+        <span className="text-white">{message}</span>
+      </div>
+      <button
+        onClick={onClose}
+        className="ml-4 text-white opacity-80 hover:opacity-100"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
 
 const Settings = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("profile");
-  const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [profileLockedFields, setProfileLockedFields] = useState({});
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("info");
 
   const countries = COUNTRIES_LIST;
-  
 
   const [profile, setProfile] = useState({
     name: "",
@@ -69,8 +108,6 @@ const Settings = () => {
     country: "",
     countryCode: "",
   });
-  const [profileLockedFields, setProfileLockedFields] = useState({});
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -126,17 +163,6 @@ const Settings = () => {
     },
   ]);
 
-  const [paymentMethods, setPaymentMethods] = useState([
-    { id: 1, type: "visa", last4: "4242", expiry: "06/2025", default: true },
-    {
-      id: 2,
-      type: "mastercard",
-      last4: "5555",
-      expiry: "09/2024",
-      default: false,
-    },
-  ]);
-
   const [billingInfo, setBillingInfo] = useState({
     currentPlan: null,
     subscriptionStatus: null,
@@ -144,10 +170,55 @@ const Settings = () => {
     razorpaySubscriptionId: null,
   });
 
+  const showCustomToast = (message, type = "info") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+      setToastMessage("");
+      setToastType("info");
+    }, 5000);
+  };
+
+  const handleCancelSubscription = async () => {
+  
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        "http://localhost:1316/api/settings/billing/cancel",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      showCustomToast( response.data.message || "Subscription cancelled successfully.", "success" );
+
+      await fetchBillingDetails();
+    } catch (err) {
+      showCustomToast(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to cancel subscription.",
+        "error"
+      );
+      console.error(
+        "Failed to cancel subscription:",
+        err.response?.data || err
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const message = "Are you sure you want to cancel your subscription? This action cannot be undone.";
+    
+
   const fetchBillingDetails = useCallback(async () => {
     console.log("fetchBillingDetails: Starting...");
     setIsLoading(true);
-    setError(null);
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
@@ -165,17 +236,24 @@ const Settings = () => {
         }))
       );
     } catch (err) {
-      console.error("fetchBillingDetails: API call failed:",err.response?.data || err);
-      setError(err.response?.data?.message ||err.message ||"Failed to fetch billing details.");
+      console.error(
+        "fetchBillingDetails: API call failed:",
+        err.response?.data || err
+      );
+      showCustomToast(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch billing details.",
+        "error"
+      );
     } finally {
       console.log("fetchBillingDetails: Setting isLoading to false.");
       setIsLoading(false);
     }
-  }, [setIsLoading, setError, setBillingInfo, setPlans]);
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     setIsProfileLoading(true);
-    setError(null);
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
@@ -200,7 +278,7 @@ const Settings = () => {
         countryCode: data.address?.countryCode || "",
       }));
 
-     if (data.address?.country && countries && countries.length > 0) {
+      if (data.address?.country && countries && countries.length > 0) {
         const countryDetails = countries.find(
           (c) => c.code === data.address.country
         );
@@ -214,48 +292,17 @@ const Settings = () => {
       setProfileLockedFields(data.profileLockedFields || {});
     } catch (err) {
       console.error("Failed to fetch profile:", err.response?.data || err);
-      setError(err.response?.data?.message || err.message || "Failed to fetch profile.");
+      showCustomToast(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch profile.",
+        "error"
+      );
     } finally {
       setIsProfileLoading(false);
     }
-  }, [countries, setError, setIsProfileLoading, setProfile, setProfileLockedFields]);
-
-
-  const handleDeletePaymentMethod = async (methodId) => {
-    if (!window.confirm("Are you sure you want to delete this payment method?"))
-      return;
-
-    const token = localStorage.getItem("authToken");
-  if (!token) {
-    setError("Authentication token not found. Please log in again.");
-    return;
-  }
-
-    try {
-      await axios.delete(
-        `http://localhost:1316/api/settings/payment-methods/${methodId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setPaymentMethods((prevMethods) =>
-        prevMethods.filter((method) => method.id !== methodId)
-      );
-      setSuccessMessage("Payment method deleted successfully.");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed to delete payment method."
-      );
-      console.error(
-        "Failed to delete payment method:",
-        err.response?.data || err
-      );
-    } finally {
-      // setIsLoading(false); // or setIsDeletingPaymentMethod(false)
-    }
-  };
+  }, [countries]);
+  // setIsLoading, setBillingInfo, setPlans
 
   useEffect(() => {
     console.log("Main effect run. Active tab:", activeTab);
@@ -266,11 +313,11 @@ const Settings = () => {
       fetchBillingDetails();
       console.log("Would fetch billing details");
     }
-  }, [activeTab, fetchProfile, fetchBillingDetails]); 
+  }, [activeTab, fetchProfile, fetchBillingDetails]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    navigate("/login");
+    navigate("/");
   };
 
   const handleProfileInputChange = (e) => {
@@ -305,8 +352,6 @@ const Settings = () => {
     console.log("handleUpdateProfile called. Event:", e);
     e.preventDefault();
     setIsProfileLoading(true);
-    setError(null);
-    setSuccessMessage("");
 
     const payload = {
       name: profile.name,
@@ -349,16 +394,17 @@ const Settings = () => {
           "",
       }));
       setProfileLockedFields(responseData.user.profileLockedFields || {});
-      setSuccessMessage(
-        responseData.message || "Profile updated successfully!"
+      showCustomToast(
+        responseData.message || "Profile updated successfully!",
+        "success"
       );
       setIsEditingProfile(false);
-      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setError(
+      showCustomToast(
         err.response?.data?.message ||
           err.message ||
-          "Failed to update profile."
+          "Failed to update profile.",
+        "error"
       );
       console.error("Failed to update profile:", err.response?.data || err);
     } finally {
@@ -380,21 +426,22 @@ const Settings = () => {
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setIsPasswordLoading(true);
-    setError(null);
-    setSuccessMessage("");
 
     if (!passwordData.currentPassword) {
-      setError("Please enter your current password.");
+      showCustomToast("Please enter your current password.", "warning");
       setIsPasswordLoading(false);
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setError("New passwords do not match.");
+      showCustomToast("New passwords do not match.", "warning");
       setIsPasswordLoading(false);
       return;
     }
     if (passwordData.newPassword.length < 6) {
-      setError("New password must be at least 6 characters long.");
+      showCustomToast(
+        "New password must be at least 6 characters long.",
+        "warning"
+      );
       setIsPasswordLoading(false);
       return;
     }
@@ -409,7 +456,10 @@ const Settings = () => {
         }
       );
       const data = response.data;
-      setSuccessMessage(data.message || "Password updated successfully!");
+      showCustomToast(
+        data.message || "Password updated successfully!",
+        "success"
+      );
       setPasswordData({
         currentPassword: "",
         newPassword: "",
@@ -417,10 +467,11 @@ const Settings = () => {
       });
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setError(
+      showCustomToast(
         err.response?.data?.message ||
           err.message ||
-          "Failed to update password."
+          "Failed to update password.",
+        "error"
       );
       console.error("Failed to update password:", err.response?.data || err);
     } finally {
@@ -430,22 +481,38 @@ const Settings = () => {
 
   const handleChangePlan = async (newPlanId) => {
     const planToUpdate = plans.find((plan) => plan.id === newPlanId);
-    if (!planToUpdate || planToUpdate.current) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to ${
-          planToUpdate.price > 0 ? "upgrade to" : "downgrade to"
-        } the ${planToUpdate.name} plan?`
-      )
-    )
+
+    if (isLoading) {
+      showCustomToast("A plan change is already in progress.", "info");
       return;
+    }
+    if (!planToUpdate) {
+      showCustomToast("Invalid plan selected.", "error");
+      return;
+    }
+    if (planToUpdate.current) {
+      showCustomToast("You are already on this plan.", "info");
+      return;
+    }
+
+    let confirmMessage = `Are you sure you want to change to the ${planToUpdate.name} plan?`;
+    if (newPlanId === "free" && billingInfo.currentPlan !== "free") {
+      confirmMessage = "Are you sure you want to downgrade to the Free plan? Your current subscription will be cancelled.";
+    } else if (planToUpdate.price > (billingInfo.currentPlanPrice || 0)) {
+      confirmMessage = `Are you sure you want to upgrade to the ${planToUpdate.name} plan?`;
+    } else if (planToUpdate.price < (billingInfo.currentPlanPrice || 0)) {
+      confirmMessage = `Are you sure you want to downgrade to the ${planToUpdate.name} plan?`;
+    }
+
 
     setIsLoading(true);
-    setError(null);
-    setSuccessMessage("");
 
     try {
       const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in.");
+      }
+
       const response = await axios.post(
         "http://localhost:1316/api/settings/billing/subscribe",
         { newPlanId },
@@ -453,53 +520,93 @@ const Settings = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = response.data;
-      setBillingInfo({
-        ...billingInfo,
+
+      const { subscriptionId, status, message, razorpayKeyId } = response.data;
+
+      setBillingInfo((prev) => ({
+        ...prev,
         currentPlan: newPlanId,
-        subscriptionStatus: data.status,
-        razorpaySubscriptionId: data.subscriptionId,
-      });
+        subscriptionStatus: status,
+        razorpaySubscriptionId: subscriptionId,
+        currentPlanPrice: planToUpdate.price,
+      }));
+
       setPlans((prevPlans) =>
         prevPlans.map((p) => ({ ...p, current: p.id === newPlanId }))
       );
-      setSuccessMessage(
-        data.message || `Successfully changed to ${newPlanId} plan.`
-      );
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+
+      if (newPlanId === "free") {
+        showCustomToast("Successfully downgraded to Free Plan.", "success");
+        setIsLoading(false);
+        return;
+      }
+
+      if (status === "created" && subscriptionId) {
+        if (typeof window.Razorpay === "undefined") {
+          showCustomToast(
+            "Razorpay SDK not loaded. Please refresh the page or check your internet connection.",
+            "error"
+          );
+          console.error("Razorpay SDK (window.Razorpay) is not available.");
+          setIsLoading(false);
+          return;
+        }
+
+        const razorpayOptions = {
+          key: razorpayKeyId,
+          subscription_id: subscriptionId,
+          name: "Krevelance",
+          description: `Subscription for ${planToUpdate.name} plan`,
+          handler: async function (paymentResponse) {
+            setSuccessMessage("Payment successful! Your plan is now active.");
+            console.log("Razorpay Payment Response:", paymentResponse);
+            await fetchBillingDetails();
+            setIsLoading(false);
+          },
+          prefill: {
+            name: profile.name,
+            email: profile.email,
+            contact: profile.phone,
+          },
+          theme: {
+            color: "#0FCE7C",
+          },
+        };
+
+        const rzp = new window.Razorpay(razorpayOptions);
+        rzp.on("payment.failed", function (response) {
+          showCustomToast(
+            `Payment failed: ${response.error.description}`,
+            "error"
+          );
+          console.error("Razorpay Payment Failed:", response.error);
+          fetchBillingDetails();
+          setIsLoading(false);
+        });
+        rzp.open();
+      } else {
+        showCustomToast(
+          message ||
+            "Subscription could not be created or an unexpected status was returned.",
+          "error"
+        );
+        setIsLoading(false);
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Failed to change plan."
+      showCustomToast(
+        err.response?.data?.message || err.message || "Failed to change plan.",
+        "error"
       );
       console.error("Failed to change plan:", err.response?.data || err);
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancelSubscription = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to cancel your subscription and move to the Free plan?"
-      )
-    ) {
-      handleChangePlan("free");
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete your account? This action is irreversible."
-      )
-    )
-      return;
-
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
     setIsDeletingAccount(true);
     setIsLoading(true);
-    setError(null);
+
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
@@ -510,15 +617,19 @@ const Settings = () => {
         }
       );
       const data = response.data;
-      setSuccessMessage(
+      showCustomToast(
         data.message ||
-          "Account deletion request sent. Please check your email to confirm."
+          "Account deletion request sent. Please check your email to confirm.",
+        "success"
       );
+
+      // setTimeout(() => navigate("/"), 3000);
     } catch (err) {
-      setError(
+      showCustomToast(
         err.response?.data?.message ||
           err.message ||
-          "Account deletion request failed."
+          "Account deletion request failed.",
+        "error"
       );
       console.error(
         "Account deletion request failed:",
@@ -533,10 +644,9 @@ const Settings = () => {
   const isFieldDisabled = (fieldName) =>
     !isEditingProfile || profileLockedFields[fieldName];
 
-
-
   return (
     <div>
+      <Toaster />
       <Navbar1 />
       <div className="page-container mt-8 py-16">
         <div className="flex justify-between items-center mb-4">
@@ -556,15 +666,12 @@ const Settings = () => {
           Manage your account, subscription and preferences
         </p>
 
-        {successMessage && (
-          <div className="my-4 p-3 bg-green-600 text-white rounded text-left">
-            {successMessage}
-          </div>
-        )}
-        {error && (
-          <div className="my-4 p-3 bg-red-600 text-white rounded text-left">
-            {error}
-          </div>
+        {showToast && (
+          <Toast
+            message={toastMessage}
+            type={toastType}
+            onClose={() => setShowToast(false)}
+          />
         )}
 
         <div className="flex flex-col lg:flex-row gap-8 mt-8">
@@ -612,10 +719,6 @@ const Settings = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        console.log(
-                          "Toggling isEditingProfile. Current value:",
-                          isEditingProfile
-                        );
                         setIsEditingProfile(!isEditingProfile);
                       }}
                       className="flex items-center bg-[#0FCE7C]/30 text-[#0FCE7C] px-4 py-2 mb-2 rounded-md hover:scale-105 hover:bg-[#0FCE7C]/30"
@@ -976,30 +1079,25 @@ const Settings = () => {
                 </div>
 
                 {/*Delete Account */}
-                <div>
-                  <div className="glass-card text-left p-6 rounded-lg">
-                    <h2 className="text-2xl font-semibold mb-2 text-white">
-                      Danger Zone
-                    </h2>
-                    <p className="text-gray-400 mb-4">
-                      Once you delete your account, all your data will be
-                      permanently removed. This action cannot be undone.
-                    </p>
 
-                    <button
-                      onClick={handleDeleteAccount}
-                      className="flex bg-red-600 mb-3 hover:scale-105 hover:bg-red-700 text-white rounded-md px-4 py-2"
-                      disabled={isLoading || isDeletingAccount}
-                    >
-                      <AlertTriangle className="mr-2 mt-1 h-4 w-4" />
-                      Delete Account
-                    </button>
+                <div className="glass-card text-left p-6 rounded-lg">
+                  <h2 className="text-2xl font-semibold mb-2 text-white">
+                    Danger Zone
+                  </h2>
+                  <p className="text-gray-400 mb-4">
+                    Once you delete your account, all your data will be
+                    permanently removed. This action cannot be undone.
+                  </p>
 
-                    {error && <div className="text-red-500">{error}</div>}
-                    {successMessage && (
-                      <div className="text-green-500 mb-4">{successMessage}</div>
-                    )}
-                  </div>
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="flex bg-red-600 mb-3 hover:scale-105 hover:bg-red-700 text-white rounded-md px-4 py-2"
+                    disabled={isLoading || isDeletingAccount}
+                  >
+                    <AlertTriangle className="mr-2 mt-1 h-4 w-4" />
+                    Delete Account
+                  </button>
+                  
                 </div>
               </div>
             )}
@@ -1049,8 +1147,11 @@ const Settings = () => {
                     <button
                       className="bg-white mr-4 text-black hover:scale-105 hover:bg-[#0FCE7C] rounded-md px-4 py-2"
                       onClick={() =>
-                        alert("Invoice history feature coming soon!")
-                      } // TODO: Implement
+                        showCustomToast(
+                          "Invoice history feature coming soon!",
+                          "info"
+                        )
+                      }
                     >
                       View Invoice History
                     </button>
@@ -1136,18 +1237,7 @@ const Settings = () => {
                             {plan.features.map((feature, index) => (
                               <li key={index} className="flex items-start">
                                 <Check className="h-5 w-5 text-[#0FCE7C] mr-2 shrink-0" />
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  className="h-5 w-5 text-[#0FCE7C] mr-2 shrink-0"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
+
                                 <span className="text-sm text-gray-300">
                                   {feature}
                                 </span>
@@ -1170,70 +1260,44 @@ const Settings = () => {
                     })}
                   </div>
                 </div>
-
-                <div className="glass-card p-6 rounded-lg">
-                  <h2 className="text-3xl font-semibold mb-4 text-white text-left">
-                    Payment Methods
-                  </h2>
-                  <div className="space-y-4 mb-6">
-                    {paymentMethods.map((method) => (
-                      <div
-                        key={method.id}
-                        className="flex items-center justify-between border border-white/10 rounded-lg p-4"
-                      >
-                        <div className="flex items-center">
-                          <div className="w-12 h-8 bg-white/10 rounded flex items-center justify-center mr-4">
-                            {method.type === "visa" ? (
-                              <span className="text-blue-500 font-bold">
-                                VISA
-                              </span>
-                            ) : (
-                              <span className="text-red-500 font-bold">MC</span>
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-white">
-                              •••• •••• •••• {method.last4}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Expires {method.expiry}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          {method.default && (
-                            <span className="bg-[#0FCE7C]/30 text-[#0FCE7C] px-2 py-1 rounded-md mr-3">
-                              Default
-                            </span>
-                          )}
-                          <button
-                            type="button"
-                            size="sm"
-                            className="h-8 w-8 pl-2 text-red-600  rounded-full hover:bg-white/10"
-                            onClick={() => handleDeletePaymentMethod(method.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      alert("Add Payment Method functionality to be implemented!");
-                      // Example: handleOpenAddPaymentModal();
-                    }}
-                    className="hover:bg-white text-black hover:scale-105 bg-[#0FCE7C] rounded-md px-4 py-2"
-                  >
-                    Add Payment Method
-                  </button>
-                </div>
               </div>
             )}
           </div>
         </div>
+        {showDeleteConfirm && (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+        <div className="glass-card p-8 rounded-lg text-center max-w-md mx-4">
+            <AlertTriangle className="mx-auto h-16 w-16 text-[#ff000d]" />
+            <h2 className="text-2xl font-bold text-white mt-4">
+                Are you sure?
+            </h2>
+            <p className="text-gray-300 mt-2 mb-6">
+                This action is irreversible. All your data will be permanently removed. Please confirm you want to proceed.
+            </p>
+            <div className="flex justify-center gap-4">
+                <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-6 py-2 rounded-md bg-[#303030] hover:bg-[#3b3b3b] text-white font-semibold"
+                    disabled={isDeletingAccount}
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={handleConfirmDelete}
+                    className="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center"
+                    disabled={isDeletingAccount}
+                >
+                    {isDeletingAccount ? (
+                        <Loader2 className="animate-spin mr-2" />
+                    ) : (
+                        <Trash2 className="mr-2 h-5 w-5" />
+                    )}
+                    {isDeletingAccount ? "Deleting..." : "Yes, Delete It"}
+                </button>
+            </div>
+        </div>
+    </div>
+)}
       </div>
     </div>
   );

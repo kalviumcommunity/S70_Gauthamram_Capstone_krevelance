@@ -82,7 +82,7 @@ const Landing = () => {
 
   return (
     <Layout>
-      <section className="relative min-h-[90vh] flex items-center max-w-7xl mx-auto">
+      <section className="relative min-h-[90vh] flex items-center max-w-7xl mx-auto ">
         <div className="container mx-auto px-4 z-10">
           <div className="flex flex-col lg:flex-row items-center gap-10">
             <div className="lg:w-1/2 space-y-6">
