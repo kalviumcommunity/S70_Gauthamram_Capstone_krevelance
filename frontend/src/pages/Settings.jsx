@@ -629,10 +629,6 @@ const Settings = () => {
           "Account deletion request failed.",
         "error"
       );
-      console.error(
-        "Account deletion request failed:",
-        err.response?.data || err
-      );
     } finally {
       setIsDeletingAccount(false);
       setIsLoading(false);
@@ -719,10 +715,10 @@ const Settings = () => {
                       onClick={() => {
                         setIsEditingProfile(!isEditingProfile);
                       }}
-                      className="flex items-center bg-[#0FCE7C]/30 text-[#0FCE7C] px-4 py-2 mb-2 rounded-md hover:scale-105 hover:bg-[#0FCE7C]/30"
+                      className="flex bg-[#0FCE7C]/30 text-[#0FCE7C] px-4 py-2 mb-2 rounded-md hover:scale-105 hover:bg-[#0FCE7C]/30"
                       disabled={isProfileLoading}
                     >
-                      <Edit3 className="w-6 h-6 mr-3" /> Edit
+                      <Edit3 className="w-6 h-6 mr-3" /> Update Profile
                     </button>
                   ) : (
                     <button
@@ -1089,7 +1085,7 @@ const Settings = () => {
 
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="flex bg-red-600 mb-3 hover:scale-105 hover:bg-red-700 text-white rounded-md px-4 py-2"
+                    className="flex bg-red-700 mb-3 hover:scale-105 hover:bg-red-500 text-white rounded-md px-4 py-2"
                     disabled={isLoading || isDeletingAccount}
                   >
                     <AlertTriangle className="mr-2 mt-1 h-4 w-4" />
