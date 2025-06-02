@@ -296,7 +296,7 @@ const Signup = () => {
                                 <div className="flex-grow border-t border-white/20"></div>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
-                                <a href="http://localhost:1316/api/auth/google">
+                                <a href="https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/auth/google">
                                     <button
                                         type="button"
                                         className="hover:bg-white hover:text-black bg-[#414141] text-white py-2 px-4 -mt-7 rounded-md transition-colors duration-300 flex items-center justify-center font-medium w-full" 

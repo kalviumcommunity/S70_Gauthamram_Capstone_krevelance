@@ -187,7 +187,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        "http://localhost:1316/api/settings/billing/cancel",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing/cancel",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -222,7 +222,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
-        "http://localhost:1316/api/settings/billing",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -257,7 +257,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
-        "http://localhost:1316/api/settings/profile",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/profile",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -368,7 +368,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        "http://localhost:1316/api/settings/profile",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/profile",
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -449,7 +449,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        "http://localhost:1316/api/settings/password",
+        "hhttps://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/password",
         passwordData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -512,7 +512,7 @@ const Settings = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:1316/api/settings/billing/subscribe",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing/subscribe",
         { newPlanId },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -608,7 +608,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        "http://localhost:1316/api/settings/delete-account-request",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/delete-account-request",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

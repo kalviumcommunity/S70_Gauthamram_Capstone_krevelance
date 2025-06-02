@@ -282,7 +282,7 @@ const Reports = () => {
 
     useEffect(() => {
         setLoading(true);
-        fetch("http://localhost:1316/api/report/reports")
+        fetch("https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/report/reports")
             .then((response) => {
                 console.log("Response:", response);
                 if (!response.ok) {

@@ -39,7 +39,7 @@ const StatCard = ({
 
             <div className="flex-grow flex items-center">
                 <span className={`text-2xl font-semibold ${isPrimary ? "text-[#0FCE7C]" : "text-white"}`}>
-                    {formattedValue !== null && formattedValue !== undefined ? formattedValue : 'N/A'}
+                    {formattedValue !== null && formattedValue !== undefined ? formattedValue : '0'}
                 </span>
             </div>
 
