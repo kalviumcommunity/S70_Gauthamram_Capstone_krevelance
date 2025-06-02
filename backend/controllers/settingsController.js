@@ -166,9 +166,8 @@ const requestAccountDeletion = async (req, res) => {
     user.deleteAccountExpires = Date.now() + 3600000;
 
     await user.save();
-    const deleteUrl = `${process.env.FRONTEND_URL || "https://krevelance.netlify.app"}/confirm-delete-account?token=${token}`; 
+    const deleteUrl = `https://krevelance.netlify.app/confirm-delete-account?token=${token}`; 
 
-    
     const websiteName = "Krevelance"; 
     const emailSubject = `Confirm Your Account Deletion - ${websiteName}`;
     const userName = user.name;
