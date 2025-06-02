@@ -19,7 +19,7 @@ app.use(passport.initialize());
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:1613",
+    origin: process.env.FRONTEND_URL || "https://krevelance.netlify.app",
      methods: ['GET', 'POST', 'PUT', 'DELETE'], 
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
