@@ -166,7 +166,7 @@ const requestAccountDeletion = async (req, res) => {
     user.deleteAccountExpires = Date.now() + 3600000;
 
     await user.save();
-    const deleteUrl = `${process.env.FRONTEND_URL || "http://localhost:1613"}/confirm-delete-account?token=${token}`; 
+    const deleteUrl = `${process.env.FRONTEND_URL || "https://krevelance.netlify.app"}/confirm-delete-account?token=${token}`; 
 
     
     const websiteName = "Krevelance"; 
