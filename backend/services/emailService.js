@@ -53,28 +53,28 @@ const generateStyledEmailHTML = (
    margin-bottom: 20px;
    line-height: 1.5;
  }
- .main-message-text { /* Changed from .confirmation-text for generality */
+ .main-message-text { 
    font-size: 16px;
    margin-bottom: 25px;
    line-height: 1.5;
  }
- .action-link-container { /* Changed from .confirmation-link-container */
+ .action-link-container { 
    text-align: center;
    margin-bottom: 25px;
  }
  .action-link { /* Changed from .confirmation-link */
    display: inline-block;
    padding: 12px 25px;
-   background-color: #0FCE7C; /* Your brand color */
+   background-color: #0FCE7C; 
    color: #ffffff; /* White text for better contrast */
    border-radius: 8px;
    text-decoration: none;
    font-size: 16px;
    font-weight: bold;
-   border: 1px solid #0FCE7C; /* Matching border */
+   border: 1px solid #0FCE7C; 
  }
  .action-link:hover {
-    background-color: #0DAA69; /* Slightly darker shade for hover */
+    background-color: #0DAA69; 
     border-color: #0DAA69;
  }
  .expiry-info {
