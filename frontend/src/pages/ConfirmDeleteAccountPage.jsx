@@ -26,7 +26,7 @@ const ConfirmDeleteAccountPage = () => {
       setMessage("");
       try {
         const response = await fetch(
-          `http://localhost:1316/api/settings/confirm-delete-account?token=${token}`,
+          `https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/confirm-delete-account?token=${token}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },

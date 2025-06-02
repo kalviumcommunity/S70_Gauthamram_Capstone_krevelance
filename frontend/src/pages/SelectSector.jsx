@@ -58,7 +58,7 @@ const SelectSector = () => {
     const toastId = toast.loading("Completing signup...");
 
     try {
-      const res = await api.post("http://localhost:1316/api/auth/signup", {
+      const res = await api.post("https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/auth/signup", {
         name,
         email,
         password,

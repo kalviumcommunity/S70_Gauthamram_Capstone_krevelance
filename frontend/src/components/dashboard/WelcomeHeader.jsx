@@ -23,7 +23,7 @@ const WelcomeHeader = () => {
 
       try {
         const response = await fetch(
-          "http://localhost:1316/api/settings/profile",
+          "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/profile",
           {
             method: "GET",
             headers: {

@@ -16,7 +16,7 @@ const Login = () => {
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 
-  const API_URL = "http://localhost:1316/api";
+  const API_URL = "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

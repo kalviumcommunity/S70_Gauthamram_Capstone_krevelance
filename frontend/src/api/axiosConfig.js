@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:1316/api', 
+  baseURL: 'https://s70-gauthamram-capstone-krevelance-1.onrender.com/api', 
 });
 
 api.interceptors.request.use(

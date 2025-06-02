@@ -101,7 +101,6 @@ const getDashboardData = asyncHandler(async (req, res) => {
 
     const predictedRetainedUsersValue = await predictRetainedUsers(
         historicalSummaryForAI,
-        activeUsersCount, 
         predictionTimeframe
     );
 
@@ -126,7 +125,7 @@ const getDashboardData = asyncHandler(async (req, res) => {
                 value: predictedRetainedUsersValue, 
                 change: null, 
                 trend: null,
-                predictionTimeframe: `${predictionTimeframe === '3m' || '6m' || '1y' ? '3 Months' || '6 Months' || '1 Year' : predictionTimeframe}` // Add context
+                predictionTimeframe: `${predictionTimeframe === '3m' || '6m' || '1y' ? '3 Months' || '6 Months' || '1 Year' : predictionTimeframe}` 
             }
         },
         charts: {
