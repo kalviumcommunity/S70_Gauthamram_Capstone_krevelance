@@ -449,7 +449,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        "hhttps://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/password",
+        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/password",
         passwordData,
         {
           headers: { Authorization: `Bearer ${token}` },
