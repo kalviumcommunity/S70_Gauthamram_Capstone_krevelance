@@ -4,24 +4,24 @@ import {
     ArrowDownIcon,
     TrendingUp,
     Users,
-    MinusIcon, 
+    MinusIcon,
     Activity,
 } from "lucide-react";
 
 const StatCard = ({
     title,
     value,
-    change, 
+    change,
     icon,
     description,
     className = "",
     isPrimary = false,
     trend,
-    predictionTimeframe 
+    predictionTimeframe
 }) => {
     const isPositive = trend === "up" && change !== null;
     const isNegative = trend === "down" && change !== null;
-    const isPrediction = !!predictionTimeframe; 
+    const isPrediction = !!predictionTimeframe;
 
     const formattedValue = typeof value === 'number' ? value.toLocaleString() : value;
 
@@ -49,20 +49,20 @@ const StatCard = ({
                         <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
                     ) : isNegative ? (
                         <ArrowDownIcon className="h-4 w-4 text-red-400 mr-1" />
-                    ) : ( 
-                         <MinusIcon className="h-4 w-4 text-gray-500 mr-1" />
+                    ) : (
+                        <MinusIcon className="h-4 w-4 text-gray-500 mr-1" />
                     )}
 
                     <span className={`text-xs ${isPositive ? "text-green-500" : isNegative ? "text-red-400" : "text-gray-400"}`}>
                         {isPositive ? "+" : ""}
-                        {change}% {isPositive ? "increase" : isNegative ? "decrease" : "no change"}
+                        {Number(change).toFixed(3)}% {isPositive ? "increase" : isNegative ? "decrease" : "no change"}
                     </span>
-                     
+
                 </div>
             )}
 
-             {description && !isPrediction && <p className="text-xs text-gray-400 mt-2">{description}</p>}
-             
+            {description && !isPrediction && <p className="text-xs text-gray-400 mt-2">{description}</p>}
+
 
         </div>
     );
@@ -72,12 +72,12 @@ const StatCardsSection = ({ statsInput }) => {
     const stats = [
         {
             title: "Total Revenue",
-            icon: "₹", 
+            icon: "₹",
             ...statsInput?.totalRevenue
         },
         {
             title: "Total Expenses",
-            icon: <TrendingUp className="h-5 w-5 transform scale-y-[-1]" />, 
+            icon: <TrendingUp className="h-5 w-5 transform scale-y-[-1]" />,
             ...statsInput?.totalExpenses
         },
         {
@@ -85,28 +85,21 @@ const StatCardsSection = ({ statsInput }) => {
             icon: <TrendingUp className="h-5 w-5" />,
             ...statsInput?.netProfit
         },
-        {
-            title: "Active Users",
-            icon: <Activity className="h-5 w-5" />, 
-             predictionTimeframe: statsInput?.activeUsers?.predictionTimeframe,
-            value: statsInput?.activeUsers?.value, 
-            change: statsInput?.activeUsers?.change,
-            trend: statsInput?.activeUsers?.trend, 
-        },
+       
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {stats.map((stat, index) => (
                 <StatCard
                     key={index}
                     title={stat.title}
-                    value={stat.value ?? null} 
-                    change={stat.change ?? null} 
+                    value={stat.value ?? null}
+                    change={stat.change ?? null}
                     icon={stat.icon}
                     description={stat.description}
                     trend={stat.trend ?? null}
-                    predictionTimeframe={stat.predictionTimeframe}/>
+                    predictionTimeframe={stat.predictionTimeframe} />
             ))}
         </div>
     );

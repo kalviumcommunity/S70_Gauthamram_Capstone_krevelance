@@ -6,6 +6,9 @@ import { GiFarmTractor } from "react-icons/gi";
 import { FaQuestion, FaIndustry, FaStore, FaLaptopCode } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
+
 const ALLOWED_SECTORS = [
   "Agriculture",
   "Tech/SaaS",
@@ -31,65 +34,41 @@ const OtherIcon = () => <FaQuestion className="h-6 w-6 inline-block mr-2" />;
 const SelectSector = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { name, email, password, agreeTerms } = location.state || {};
+  const { email, password, agreeTerms, company, phone, address, country, countryCode } = location.state || {};
   const [selectedSector, setSelectedSector] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!name || !email || !password || agreeTerms === undefined) {
-      console.warn("Missing signup data, redirecting to signup.");
-      toast.error("Something went wrong, please start signup again.");
-      navigate("/signup", { replace: true });
+    if (!email || !password || agreeTerms === undefined) {
+      toast.error("Missing signup information. Please start over.");
+      navigate("/signup");
     }
-  }, [name, email, password, agreeTerms, navigate]);
+  }, [email, password, agreeTerms, navigate]);
 
   const handleSectorSelect = (sector) => {
     setSelectedSector(sector);
   };
 
-  const handleCompleteSignup = async (event) => {
-    event.preventDefault();
-    if (!selectedSector) {
-      toast.error("Please select your business sector.");
-      return;
-    }
+  // ...
 
-    setIsLoading(true);
-    const toastId = toast.loading("Completing signup...");
-
-    try {
-      const res = await api.post("https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/auth/signup", {
-        name,
+  const handleNextStep = (event) => {
+    // ...
+    navigate('/tax-info', {
+      state: {
         email,
         password,
-        businessSector: selectedSector,
-        agreeTerms: agreeTerms,
-      });
-
-      setIsLoading(false);
-      toast.success(res.data.message || "Signup Successful!", { id: toastId });
-      console.log("Signup successful:", res.data);
-
-      localStorage.setItem("authToken", res.data.token);
-      localStorage.setItem("userInfo", JSON.stringify(res.data.user));
-
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1000);
-    } catch (err) {
-      setIsLoading(false);
-      const errorMsg =
-        err.response?.data?.message ||
-        "Signup failed. Please check your details or try again later.";
-      toast.error(errorMsg, { id: toastId });
-      console.error(
-        "Final Signup Error:",
-        err.response || err.request || err.message
-      );
-    }
+        agreeTerms,
+        company,
+        phone,
+        address,
+        country,
+        countryCode,
+        businessSector: selectedSector
+      }
+    });
   };
 
-  if (!name || !email || !password || agreeTerms === undefined) {
+  if (!email || !password || agreeTerms === undefined) {
     return (
       <Layout showFooter={false}>
         <div className="min-h-screen flex items-center justify-center text-white">
@@ -120,11 +99,10 @@ const SelectSector = () => {
                   className={`
                                         p-4 rounded-lg text-center font-medium transition-all duration-200 ease-in-out border
                                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-[#0FCE7C]
-                                        ${
-                                          selectedSector === sector
-                                            ? "bg-[#0FCE7C] text-black border-[#0FCE7C] shadow-md scale-105"
-                                            : "bg-white/10 text-white border-gray-600 hover:bg-white/20 hover:border-gray-400"
-                                        }
+                                        ${selectedSector === sector
+                      ? "bg-[#0FCE7C] text-black border-[#0FCE7C] shadow-md scale-105"
+                      : "bg-white/10 text-white border-gray-600 hover:bg-white/20 hover:border-gray-400"
+                    }
                                     `}
                 >
                   {sector === "Agriculture" && <AgricultureIcon />}
@@ -139,11 +117,11 @@ const SelectSector = () => {
 
             <button
               type="button"
-              onClick={handleCompleteSignup}
+              onClick={handleNextStep}
               className="w-full bg-[#0FCE7C] hover:bg-[#0FCE96] text-black font-semibold py-2.5 rounded-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-[#0FCE7C] disabled:opacity-60 disabled:cursor-not-allowed"
               disabled={isLoading || !selectedSector}
             >
-              {isLoading ? "Completing Signup..." : "Complete Signup"}
+              {isLoading ? "Processing..." : "Next"}
             </button>
           </div>
         </div>
