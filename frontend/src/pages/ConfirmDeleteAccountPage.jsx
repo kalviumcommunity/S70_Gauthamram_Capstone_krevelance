@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar1";
 
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
 const ConfirmDeleteAccountPage = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +28,7 @@ const ConfirmDeleteAccountPage = () => {
       setMessage("");
       try {
         const response = await fetch(
-          `https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/confirm-delete-account?token=${token}`,
+          `${API_BASE_URL}/api/settings/confirm-delete-account?token=${token}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },

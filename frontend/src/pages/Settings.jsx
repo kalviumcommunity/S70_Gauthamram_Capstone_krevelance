@@ -16,32 +16,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-
 import Navbar1 from "../components/layout/Navbar1";
 
-const COUNTRIES_LIST = [
-  { name: "Choose your country" },
-  { name: "Argentina", code: "AR", phoneCode: "+54" },
-  { name: "Australia", code: "AU", phoneCode: "+61" },
-  { name: "Brazil", code: "BR", phoneCode: "+55" },
-  { name: "Canada", code: "CA", phoneCode: "+1" },
-  { name: "China", code: "CN", phoneCode: "+86" },
-  { name: "France", code: "FR", phoneCode: "+33" },
-  { name: "Germany", code: "DE", phoneCode: "+49" },
-  { name: "India", code: "IN", phoneCode: "+91" },
-  { name: "Italy", code: "IT", phoneCode: "+39" },
-  { name: "Japan", code: "JP", phoneCode: "+81" },
-  { name: "Mexico", code: "MX", phoneCode: "+52" },
-  { name: "Netherlands", code: "NL", phoneCode: "+31" },
-  { name: "Nigeria", code: "NG", phoneCode: "+234" },
-  { name: "Russia", code: "RU", phoneCode: "+7" },
-  { name: "South Africa", code: "ZA", phoneCode: "+27" },
-  { name: "South Korea", code: "KR", phoneCode: "+82" },
-  { name: "Spain", code: "ES", phoneCode: "+34" },
-  { name: "Switzerland", code: "CH", phoneCode: "+41" },
-  { name: "United Kingdom", code: "GB", phoneCode: "+44" },
-  { name: "United States", code: "US", phoneCode: "+1" },
-];
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
+import { COUNTRIES_LIST } from "../constants";
 
 const Toast = ({ message, type, onClose }) => {
   const bgColor = {
@@ -100,6 +79,7 @@ const Settings = () => {
     name: "",
     email: "",
     company: "",
+    gstin: "",
     phone: "",
     address: "",
     city: "",
@@ -182,26 +162,26 @@ const Settings = () => {
   };
 
   const handleCancelSubscription = async () => {
-  
+
     setIsLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing/cancel",
+        `${API_BASE_URL}/api/settings/billing/cancel`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      showCustomToast( response.data.message || "Subscription cancelled successfully.", "success" );
+      showCustomToast(response.data.message || "Subscription cancelled successfully.", "success");
 
       await fetchBillingDetails();
     } catch (err) {
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to cancel subscription.",
+        err.message ||
+        "Failed to cancel subscription.",
         "error"
       );
       console.error(
@@ -214,7 +194,7 @@ const Settings = () => {
   };
 
   const message = "Are you sure you want to cancel your subscription? This action cannot be undone.";
-    
+
 
   const fetchBillingDetails = useCallback(async () => {
     console.log("fetchBillingDetails: Starting...");
@@ -222,7 +202,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing",
+        `${API_BASE_URL}/api/settings/billing`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -242,8 +222,8 @@ const Settings = () => {
       );
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to fetch billing details.",
+        err.message ||
+        "Failed to fetch billing details.",
         "error"
       );
     } finally {
@@ -257,7 +237,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const { data } = await axios.get(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/profile",
+        `${API_BASE_URL}/api/settings/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -269,6 +249,7 @@ const Settings = () => {
         name: data.name || "",
         email: data.email || "",
         company: data.company || "",
+        gstin: data.gstin || "",
         phone: data.phone || "",
         address: data.address?.street || "",
         city: data.address?.city || "",
@@ -294,8 +275,8 @@ const Settings = () => {
       console.error("Failed to fetch profile:", err.response?.data || err);
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to fetch profile.",
+        err.message ||
+        "Failed to fetch profile.",
         "error"
       );
     } finally {
@@ -317,8 +298,11 @@ const Settings = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
     navigate("/");
   };
+
+
 
   const handleProfileInputChange = (e) => {
     const { name, value } = e.target;
@@ -339,6 +323,54 @@ const Settings = () => {
       });
     } else {
       setProfile({ ...profile, country: "", countryCode: "", phone: "" });
+    }
+  };
+
+  const handleAddressBlur = () => {
+    const addressStr = profile.address;
+    if (!addressStr || !addressStr.includes(",")) return;
+
+    const parts = addressStr.split(",").map((part) => part.trim());
+
+    let newProfile = { ...profile };
+
+    const findCountry = (str) => {
+      return countries.find(c => c.name.toLowerCase() === str.toLowerCase() || c.code.toLowerCase() === str.toLowerCase());
+    }
+
+    if (parts.length >= 3) {
+      // Logic: If last part is zip-like, it's zip. If it's country-like, it's country.
+
+      const lastPart = parts[parts.length - 1];
+      const secondLast = parts[parts.length - 2];
+
+      let countryObj = findCountry(lastPart) || findCountry(secondLast);
+
+      if (countryObj) {
+        newProfile.country = countryObj.code;
+        newProfile.countryCode = countryObj.phoneCode;
+      }
+
+      // Zip detection (digits/alphanumeric, 3-10 chars)
+      const isZip = (str) => /^[A-Z0-9\s-]{3,10}$/i.test(str) && /\d/.test(str);
+
+      if (isZip(lastPart) && !findCountry(lastPart)) {
+        newProfile.zip = lastPart;
+      } else if (isZip(secondLast) && !findCountry(secondLast)) {
+        newProfile.zip = secondLast;
+      }
+
+      if (parts.length > 2) {
+        newProfile.city = parts[1];
+        newProfile.state = parts[2];
+      }
+
+      if (newProfile.city || newProfile.state) {
+        newProfile.address = parts[0];
+      }
+
+      setProfile(newProfile);
+      showCustomToast("Address parsed and fields auto-filled!", "success");
     }
   };
 
@@ -368,7 +400,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/profile",
+        `${API_BASE_URL}/api/settings/profile`,
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -402,8 +434,8 @@ const Settings = () => {
     } catch (err) {
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to update profile.",
+        err.message ||
+        "Failed to update profile.",
         "error"
       );
       console.error("Failed to update profile:", err.response?.data || err);
@@ -449,14 +481,14 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        "hhttps://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/password",
+        `${API_BASE_URL}/api/settings/password`,
         passwordData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       const data = response.data;
-      showCustomToast( data.message || "Password updated successfully!",
+      showCustomToast(data.message || "Password updated successfully!",
         "success"
       );
       setPasswordData({
@@ -468,8 +500,8 @@ const Settings = () => {
     } catch (err) {
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to update password.",
+        err.message ||
+        "Failed to update password.",
         "error"
       );
     } finally {
@@ -512,7 +544,7 @@ const Settings = () => {
       }
 
       const response = await axios.post(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/billing/subscribe",
+        `${API_BASE_URL}/api/settings/billing/subscribe`,
         { newPlanId },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -585,7 +617,7 @@ const Settings = () => {
       } else {
         showCustomToast(
           message ||
-            "Subscription could not be created or an unexpected status was returned.",
+          "Subscription could not be created or an unexpected status was returned.",
           "error"
         );
         setIsLoading(false);
@@ -608,7 +640,7 @@ const Settings = () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.post(
-        "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api/settings/delete-account-request",
+        `${API_BASE_URL}/api/settings/delete-account-request`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -617,7 +649,7 @@ const Settings = () => {
       const data = response.data;
       showCustomToast(
         data.message ||
-          "Account deletion request sent. Please check your email to confirm.",
+        "Account deletion request sent. Please check your email to confirm.",
         "success"
       );
 
@@ -625,8 +657,8 @@ const Settings = () => {
     } catch (err) {
       showCustomToast(
         err.response?.data?.message ||
-          err.message ||
-          "Account deletion request failed.",
+        err.message ||
+        "Account deletion request failed.",
         "error"
       );
     } finally {
@@ -734,32 +766,7 @@ const Settings = () => {
                   )}
                   <form onSubmit={handleUpdateProfile}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-left">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">
-                          Full Name
-                        </label>
-                        <input
-                          name="name"
-                          className={`bg-white text-black rounded w-full h-9 px-2 ${
-                            isFieldDisabled("name")
-                              ? "bg-gray-200 cursor-not-allowed"
-                              : ""
-                          }`}
-                          value={profile.name}
-                          onChange={handleProfileInputChange}
-                          disabled={isFieldDisabled("name")}
-                          placeholder={
-                            !isEditingProfile && !profile.name ? "Not set" : ""
-                          }
-                        />
-                        {isEditingProfile &&
-                          profileLockedFields.name &&
-                          profile.name && (
-                            <p className="text-xs text-gray-400 mt-1">
-                              Name cannot be changed.
-                            </p>
-                          )}
-                      </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">
                           Email Address
@@ -784,11 +791,10 @@ const Settings = () => {
                         </label>
                         <input
                           name="company"
-                          className={`bg-white text-black rounded w-full h-9 px-2 ${
-                            !isEditingProfile
-                              ? "bg-gray-200 cursor-not-allowed"
-                              : ""
-                          }`}
+                          className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                            ? "bg-gray-200 cursor-not-allowed"
+                            : ""
+                            }`}
                           value={profile.company}
                           onChange={handleProfileInputChange}
                           disabled={!isEditingProfile}
@@ -801,15 +807,28 @@ const Settings = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">
+                          GSTIN (Tax ID)
+                        </label>
+                        <input
+                          className="bg-gray-200 text-black rounded w-full h-9 px-2 cursor-not-allowed"
+                          value={profile.gstin || "N/A"}
+                          readOnly
+                          disabled
+                        />
+                        <p className="text-xs text-gray-400 mt-1">
+                          GSTIN cannot be changed.
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
                           Country
                         </label>
                         <select
                           name="country"
-                          className={`bg-white text-black rounded w-full h-9 px-2 ${
-                            !isEditingProfile
-                              ? "bg-gray-200 cursor-not-allowed"
-                              : ""
-                          }`}
+                          className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                            ? "bg-gray-200 cursor-not-allowed"
+                            : ""
+                            }`}
                           value={profile.country}
                           onChange={handleCountryChange}
                           disabled={!isEditingProfile}
@@ -837,15 +856,13 @@ const Settings = () => {
                           <input
                             name="phone"
                             type="tel"
-                            className={`bg-white text-black rounded-${
-                              isEditingProfile && profile.countryCode
-                                ? "r-md"
-                                : "md"
-                            } w-full h-9 px-2 ${
-                              !isEditingProfile
+                            className={`bg-white text-black rounded-${isEditingProfile && profile.countryCode
+                              ? "r-md"
+                              : "md"
+                              } w-full h-9 px-2 ${!isEditingProfile
                                 ? "bg-gray-200 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                             value={
                               !isEditingProfile && profile.countryCode
                                 ? `${profile.countryCode} ${profile.phone}`
@@ -857,8 +874,8 @@ const Settings = () => {
                               !isEditingProfile && !profile.phone
                                 ? "Not set"
                                 : profile.country
-                                ? "Enter phone number"
-                                : "Select country first"
+                                  ? "Enter phone number"
+                                  : "Select country first"
                             }
                           />
                         </div>
@@ -875,13 +892,13 @@ const Settings = () => {
                         </label>
                         <input
                           name="address"
-                          className={`bg-white text-black rounded w-full h-9 px-2 ${
-                            !isEditingProfile
-                              ? "bg-gray-200 cursor-not-allowed"
-                              : ""
-                          }`}
+                          className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                            ? "bg-gray-200 cursor-not-allowed"
+                            : ""
+                            }`}
                           value={profile.address}
                           onChange={handleProfileInputChange}
+                          onBlur={handleAddressBlur}
                           disabled={!isEditingProfile}
                           placeholder={
                             !isEditingProfile && !profile.address
@@ -897,11 +914,10 @@ const Settings = () => {
                         </label>
                         <input
                           name="city"
-                          className={`bg-white text-black rounded w-full h-9 px-2 ${
-                            !isEditingProfile
-                              ? "bg-gray-200 cursor-not-allowed"
-                              : ""
-                          }`}
+                          className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                            ? "bg-gray-200 cursor-not-allowed"
+                            : ""
+                            }`}
                           value={profile.city}
                           onChange={handleProfileInputChange}
                           disabled={!isEditingProfile}
@@ -918,11 +934,10 @@ const Settings = () => {
                           </label>
                           <input
                             name="state"
-                            className={`bg-white text-black rounded w-full h-9 px-2 ${
-                              !isEditingProfile
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : ""
-                            }`}
+                            className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                              ? "bg-gray-200 cursor-not-allowed"
+                              : ""
+                              }`}
                             value={profile.state}
                             onChange={handleProfileInputChange}
                             disabled={!isEditingProfile}
@@ -939,11 +954,10 @@ const Settings = () => {
                           </label>
                           <input
                             name="zip"
-                            className={`bg-white text-black rounded w-full h-9 px-2 ${
-                              !isEditingProfile
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : ""
-                            }`}
+                            className={`bg-white text-black rounded w-full h-9 px-2 ${!isEditingProfile
+                              ? "bg-gray-200 cursor-not-allowed"
+                              : ""
+                              }`}
                             value={profile.zip}
                             onChange={handleProfileInputChange}
                             disabled={!isEditingProfile}
@@ -970,107 +984,7 @@ const Settings = () => {
 
                 {/*password */}
 
-                <div className="glass-card p-6 rounded-lg text-left">
-                  <h2 className="text-2xl font-semibold mb-4 text-white">
-                    Change Password
-                  </h2>
-                  <form onSubmit={handleUpdatePassword}>
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">
-                          Current Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={showCurrentPassword ? "text" : "password"}
-                            name="currentPassword"
-                            className="bg-white text-black rounded w-85 h-9 px-2"
-                            value={passwordData.currentPassword}
-                            onChange={handlePasswordInputChange}
-                            required
-                            disabled={isPasswordLoading}
-                          />
-                          <button
-                            type="button"
-                            onClick={toggleShowCurrentPassword}
-                            className="absolute inset-y-0 left-78 pr-3 flex items-center text-black focus:outline-none"
-                          >
-                            {showCurrentPassword ? (
-                              <EyeOff size={16} />
-                            ) : (
-                              <Eye size={16} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-1">
-                            New Password
-                          </label>
-                          <div className="relative">
-                            <input
-                              type={showNewPassword ? "text" : "password"}
-                              name="newPassword"
-                              className="bg-white text-black rounded w-85  h-9 px-2"
-                              value={passwordData.newPassword}
-                              onChange={handlePasswordInputChange}
-                              required
-                              disabled={isPasswordLoading}
-                            />
-                            <button
-                              type="button"
-                              onClick={toggleShowNewPassword}
-                              className="absolute inset-y-0 left-78 pr-3 flex items-center text-black focus:outline-none"
-                            >
-                              {showNewPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-1">
-                            Confirm New Password
-                          </label>
-                          <div className="relative">
-                            <input
-                              type={
-                                showConfirmNewPassword ? "text" : "password"
-                              }
-                              name="confirmNewPassword"
-                              className="bg-white text-black rounded w-85 h-9 px-2"
-                              value={passwordData.confirmNewPassword}
-                              onChange={handlePasswordInputChange}
-                              required
-                              disabled={isPasswordLoading}
-                            />
-                            <button
-                              type="button"
-                              onClick={toggleShowConfirmNewPassword}
-                              className="absolute inset-y-0 left-78  pr-3 flex items-center text-black focus:outline-none"
-                            >
-                              {showConfirmNewPassword ? (
-                                <EyeOff size={16} />
-                              ) : (
-                                <Eye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      className="bg-[#0FCE7C] hover:bg-[#0FCE96] text-black hover:scale-105 rounded-md px-4 py-2"
-                      disabled={isPasswordLoading}
-                    >
-                      {isPasswordLoading ? "Updating..." : "Update Password"}
-                    </button>
-                  </form>
-                </div>
+
 
                 {/*Delete Account */}
 
@@ -1084,6 +998,13 @@ const Settings = () => {
                   </p>
 
                   <button
+                    onClick={() => navigate('/change-password')}
+                    className="flex bg-gray-600 mb-3 hover:scale-105 hover:bg-gray-500 text-white rounded-md px-4 py-2"
+                  >
+                    Change Password
+                  </button>
+
+                  <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="flex bg-red-700 mb-3 hover:scale-105 hover:bg-red-500 text-white rounded-md px-4 py-2"
                     disabled={isLoading || isDeletingAccount}
@@ -1091,7 +1012,7 @@ const Settings = () => {
                     <AlertTriangle className="mr-2 mt-1 h-4 w-4" />
                     Delete Account
                   </button>
-                  
+
                 </div>
               </div>
             )}
@@ -1127,8 +1048,8 @@ const Settings = () => {
                     <span className="text-white">
                       {billingInfo.nextBillingDate
                         ? new Date(
-                            billingInfo.nextBillingDate
-                          ).toLocaleDateString()
+                          billingInfo.nextBillingDate
+                        ).toLocaleDateString()
                         : "N/A"}
                     </span>
                     <br />
@@ -1199,11 +1120,10 @@ const Settings = () => {
                       return (
                         <div
                           key={plan.id}
-                          className={`border rounded-lg p-5 ${
-                            isCurrent
-                              ? " border-[#0FCE7C] bg-[#0FCE7C]/5 ring-2 ring-[#0FCE7C]"
-                              : " border-white/10 hover:border-white/20"
-                          }`}
+                          className={`border rounded-lg p-5 ${isCurrent
+                            ? " border-[#0FCE7C] bg-[#0FCE7C]/5 ring-2 ring-[#0FCE7C]"
+                            : " border-white/10 hover:border-white/20"
+                            }`}
                         >
                           <div className="flex justify-between items-start mb-4">
                             <div>
@@ -1239,11 +1159,10 @@ const Settings = () => {
                             ))}
                           </ul>
                           <button
-                            className={`w-full rounded-md hover:scale-105 px-4 py-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed ${
-                              isCurrent
-                                ? "border border-white/20 text-white bg-transparent cursor-default"
-                                : " bg-[#0FCE7C] hover:bg-[#0dbd74] text-black"
-                            }`}
+                            className={`w-full rounded-md hover:scale-105 px-4 py-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed ${isCurrent
+                              ? "border border-white/20 text-white bg-transparent cursor-default"
+                              : " bg-[#0FCE7C] hover:bg-[#0dbd74] text-black"
+                              }`}
                             disabled={isCurrent || isLoading}
                             onClick={() => handleChangePlan(plan.id)}
                           >
@@ -1259,42 +1178,43 @@ const Settings = () => {
           </div>
         </div>
         {showDeleteConfirm && (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-        <div className="glass-card p-8 rounded-lg text-center max-w-md mx-4">
-            <AlertTriangle className="mx-auto h-16 w-16 text-[#ff000d]" />
-            <h2 className="text-2xl font-bold text-white mt-4">
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div className="glass-card p-8 rounded-lg text-center max-w-md mx-4">
+              <AlertTriangle className="mx-auto h-16 w-16 text-[#ff000d]" />
+              <h2 className="text-2xl font-bold text-white mt-4">
                 Are you sure?
-            </h2>
-            <p className="text-gray-300 mt-2 mb-6">
+              </h2>
+              <p className="text-gray-300 mt-2 mb-6">
                 This action is irreversible. All your data will be permanently removed. Please confirm you want to proceed.
-            </p>
-            <div className="flex justify-center gap-4">
+              </p>
+              <div className="flex justify-center gap-4">
                 <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="px-6 py-2 rounded-md bg-[#303030] hover:bg-[#3b3b3b] text-white font-semibold"
-                    disabled={isDeletingAccount}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-6 py-2 rounded-md bg-[#303030] hover:bg-[#3b3b3b] text-white font-semibold"
+                  disabled={isDeletingAccount}
                 >
-                    Cancel
+                  Cancel
                 </button>
                 <button
-                    onClick={handleConfirmDelete}
-                    className="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center"
-                    disabled={isDeletingAccount}
+                  onClick={handleConfirmDelete}
+                  className="px-6 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center"
+                  disabled={isDeletingAccount}
                 >
-                    {isDeletingAccount ? (
-                        <Loader2 className="animate-spin mr-2" />
-                    ) : (
-                        <Trash2 className="mr-2 h-5 w-5" />
-                    )}
-                    {isDeletingAccount ? "Deleting..." : "Yes, Delete It"}
+                  {isDeletingAccount ? (
+                    <Loader2 className="animate-spin mr-2" />
+                  ) : (
+                    <Trash2 className="mr-2 h-5 w-5" />
+                  )}
+                  {isDeletingAccount ? "Deleting..." : "Yes, Delete It"}
                 </button>
+              </div>
             </div>
-        </div>
-    </div>
-)}
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
 
 export default Settings;

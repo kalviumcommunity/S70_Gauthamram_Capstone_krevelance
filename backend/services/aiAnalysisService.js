@@ -1,139 +1,177 @@
 // server/services/aiAnalysisService.js
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { getMarketTrendData } = require('./marketDataService'); // Import the new service
 require('dotenv').config();
 
-// Initialize Gemini Client ONCE
 let genAI;
 try {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 } catch (error) {
     console.error("Failed to initialize GoogleGenerativeAI. Check GEMINI_API_KEY.", error);
-    // Handle initialization failure, maybe throw or set genAI to null
     genAI = null;
 }
 
-// --- Existing generateFinancialInsights function ---
-async function generateFinancialInsights(financialDataSummary) {
-    if (!genAI) throw new Error("AI Service not initialized.");
+function safeJSONParse(text, fallback) {
     try {
-        // Use specific model version like 'gemini-1.5-flash' or 'gemini-pro' etc.
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Updated model name if needed
-        const prompt = `Analyze the following financial data summary: ${JSON.stringify(financialDataSummary)}.
-        Provide:
-        1. Key insights (3-5 items) as a JSON array of objects with fields: id, title, description, type ('positive', 'warning', 'info'), icon ('TrendingUp', 'AlertTriangle', 'CheckCircle', 'Info').
-        2. A short revenue forecast text.
-        3. A short expense forecast text.
-        4. Three distinct growth opportunity descriptions as a JSON array of objects with fields: title, description.
+        // 1. Try to find JSON inside markdown code blocks
+        const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+            let content = jsonMatch[1];
+            // Attempt to clean unescaped newlines in strings if simple parse fails
+            try {
+                return JSON.parse(content);
+            } catch (e2) {
+                if (e2.message.includes("Bad control character")) {
 
-        Respond ONLY with a valid JSON object containing keys: "keyInsights", "revenueForecast", "expenseForecast", "growthOpportunities". Ensure descriptions are concise.`;
+                    console.warn("Attempting to sanitize JSON with control characters...");
+                    const sanitized = content.replace(/\n/g, "\\n").replace(/\r/g, "");
+                    try { return JSON.parse(sanitized); } catch (e3) { /* ignore */ }
+                }
+                throw e2;
+            }
+        }
 
-        // Updated to use generateContent for non-streaming
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const text = response.text();
+        const firstOpen = text.indexOf('{');
+        const lastClose = text.lastIndexOf('}');
+        if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+            const jsonString = text.substring(firstOpen, lastClose + 1);
+            return JSON.parse(jsonString);
+        }
 
-        const cleanedText = text.replace(/```json\n?|\n?```/g, "").trim();
+        return JSON.parse(text);
+    } catch (e) {
+        console.error("AI Response JSON Parse Error:", e, "\nText:", text);
+        return fallback;
+    }
+}
+// --- Retry Logic Helper ---
+const makeRequestWithRetry = async (modelName, prompt, retries = 3, delay = 2000) => {
+    for (let i = 0; i < retries; i++) {
         try {
-            return JSON.parse(cleanedText);
-        } catch (parseError) {
-            console.error("Failed to parse AI response for insights:", parseError, "\nRaw response:", text);
-            // Provide a default structure on failure
-            return { keyInsights: [], revenueForecast: "Analysis unavailable.", expenseForecast: "Analysis unavailable.", growthOpportunities: [] };
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            const isLastAttempt = i === retries - 1;
+            console.warn(`Attempt ${i + 1} failed for model ${modelName}:`, error.message);
+
+            // If 503 (Service Unavailable) or 429 (Too Many Requests), wait and retry
+            if ((error.message.includes("503") || error.message.includes("429")) && !isLastAttempt) {
+                console.log(`Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2; // Exponential backoff
+            } else if (isLastAttempt) {
+                throw error;
+            }
+        }
+    }
+};
+
+async function performAdvancedAnalysis(financialHistory, marketData) {
+    if (!genAI) throw new Error("AI Service not initialized.");
+
+    const prompt = `
+        You are an expert AI Financial Advisor (ADM - Analysis & Decision Model).
+        
+        **Objective**: Analyze the provided historical financial data of a business and the current market trends to predict future performance and offer actionable advice.
+        
+        **1. Historical Financial Data (Yearly/Monthly):**
+        ${JSON.stringify(financialHistory, null, 2)}
+        
+        **2. Current Market Data (Sector: ${marketData.sector}):**
+        ${JSON.stringify(marketData, null, 2)}
+
+        **3. Context**:
+        - Current System Date: ${new Date().toLocaleDateString()}
+        - Prediction Goal: Forecast for the NEXT 12 months starting from the month after the latest data point.
+
+        
+        **Task**:
+        1. Predict the Revenue, Expenses, Net Profit, and Churn Rate for the NEXT 12 Months.
+        2. Identify 3 Key Insights (Positive, Warning, Info).
+        3. Identify 3 Specific Growth Opportunities based on Market Data.
+        4. Provide a detailed markdown analysis explanation.
+        5. Ensure 'monthlyForecast' array contains exactly 12 entries for the future months.
+        6. In 'monthlyForecast', the "month" field MUST be a string "Month Year" (e.g., "February 2026").
+        
+        **IMPORTANT JSON FORMATTING RULES**:
+        - Return ONLY a valid JSON object.
+        - **Escape all newlines** inside strings. Use \\n, NOT literal newlines.
+        - Do not include any text outside the JSON block.
+        - Ensure all strings are properly quoted.
+        
+        **Response Format (JSON ONLY):**
+        {
+            "predictions": {
+                "revenue": "Total predicted revenue value (Quarter/Year)",
+                "expenses": "Total predicted expenses",
+                "netProfit": "Total predicted profit",
+                "churnRate": "Predicted %",
+                "growthPercentage": "Predicted growth %",
+                "monthlyForecast": [
+                    { "month": "Month Name", "revenue": 1000, "profit": 200 }
+                ]
+            },
+            "keyInsights": [
+                { "title": "...", "description": "...", "type": "positive|warning|info", "icon": "TrendingUp|AlertTriangle|Info" }
+            ],
+            "scenarioPlanning": {
+                "optimistic": "...",
+                "pessimistic": "..."
+            },
+            "growthOpportunities": [
+                { "title": "...", "description": "..." }
+            ],
+            "detailedAnalysis": "### Executive Summary\\n..."
+        }
+    `;
+
+    try {
+        try {
+            text = await makeRequestWithRetry("gemini-2.5-flash-lite", prompt, 5, 2000);
+        } catch (primaryError) {
+            console.error("Primary model failed, trying fallback...", primaryError.message);
+            // Fallback to gemini-2.0-flash
+            text = await makeRequestWithRetry("gemini-2.0-flash", prompt, 3, 3000);
         }
 
+        return safeJSONParse(text, {
+            predictions: { revenue: "N/A", expenses: "N/A", netProfit: "N/A", churnRate: "N/A", growthPercentage: "N/A" },
+            keyInsights: [],
+            detailedAnalysis: "Analysis failed to parse."
+        });
+
     } catch (error) {
-        console.error("Error calling AI Service for insights:", error);
-        // Return default structure or throw a more specific error
-        return { keyInsights: [], revenueForecast: "Error generating analysis.", expenseForecast: "Error generating analysis.", growthOpportunities: [] };
-        // Or: throw new Error("Failed to generate AI financial insights.");
+        console.error("ADM Analysis All Attempts Failed:", error);
+        return {
+            predictions: { revenue: "N/A", expenses: "N/A", netProfit: "N/A", churnRate: "N/A", growthPercentage: "N/A" },
+            keyInsights: [{ title: "Analysis Unavailable", description: "AI Service is currently overloaded. Please try again later.", type: "warning" }],
+            detailedAnalysis: "The AI service is experiencing high traffic. Please wait a moment and try again."
+        };
     }
 }
 
+async function generateFinancialInsights(financialDataSummary) {
+    if (!genAI) return { keyInsights: [], revenueForecast: "N/A" };
+    try {
+        const result = await makeRequestWithRetry("gemini-2.5-flash-lite", `Analyze this summary: ${JSON.stringify(financialDataSummary)}. Return JSON: { "keyInsights": [...], "revenueForecast": "...", "expenseForecast": "...", "growthOpportunities": [...] }`);
+        return safeJSONParse(result, {});
+    } catch (e) { return {}; }
+}
 
-// --- Existing generateDetailedAIRecommendations function ---
 async function generateDetailedAIRecommendations(financialDataSummary, userTier) {
-    if (userTier !== 'pro' && userTier !== 'enterprise') {
-        return "Upgrade to Pro or Enterprise for detailed AI recommendations.";
-    }
-     if (!genAI) return "AI Service not initialized."; // Check initialization
-
+    if (!genAI) return "AI Service Unreachable";
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Ensure consistent model usage
-        const prompt = `Based on the following financial data summary: ${JSON.stringify(financialDataSummary)}, provide detailed, actionable strategies for a user with a '${userTier}' plan to increase their business production and profitability. Structure the response clearly.`;
-
-        // Updated to use generateContent for non-streaming
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        return response.text(); // Return the generated text directly
-
-    } catch (error) {
-        console.error("Error calling AI Service for detailed recommendations:", error);
-        return "Failed to generate detailed AI recommendations due to an error."; // Return error message
-        // Or: throw new Error("Failed to generate detailed AI recommendations.");
-    }
+        return await makeRequestWithRetry("gemini-2.5-flash-lite", `Provide detailed strategies for: ${JSON.stringify(financialDataSummary)}.`);
+    } catch (e) { return "AI Service Unavailable"; }
 }
 
-// --- NEW Function for Predicting Retained Users ---
 async function predictRetainedUsers(historicalSummary, currentActiveCount, timeframe = '3m') {
-     if (!genAI) throw new Error("AI Service not initialized.");
-
-    // **VERY IMPORTANT CAVEAT:** Using an LLM like Gemini for this specific numerical
-    // prediction is NOT ideal. A dedicated ML model trained on user features
-    // would be far more reliable. This is an attempt to fit it into the existing structure.
-    // The reliability of the returned number might be low.
-
-    try {
-        // 1. Get Market Data
-        const marketData = await getMarketTrendData();
-
-        // 2. Construct the Prompt
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Or another suitable model
-        const prompt = `
-        Analyze the following business context:
-        - Historical Financial Summary: ${JSON.stringify(historicalSummary)}
-        - Current Active Users (last 30 days): ${currentActiveCount}
-        - Current Market Conditions: ${marketData.summary} (Sentiment: ${marketData.sentiment})
-
-        Based *only* on this information, estimate the approximate number of users (out of the current ${currentActiveCount})
-        that are likely to remain active customers over the next ${timeframe === '3m' ? '3 months' : timeframe === '6m' ? '6 months' : '1 year'}.
-
-        Consider the historical performance and current market trends.
-
-        Provide your best estimate as a single integer number. Respond ONLY with the number.
-        Example Response: 850
-        `;
-
-        // 3. Call AI Model
-        // console.log("Prediction Prompt:", prompt); // For debugging
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const text = response.text().trim();
-        // console.log("Raw Prediction Response:", text); // For debugging
-
-        // 4. Parse the response (attempt to get just a number)
-        const predictedNumber = parseInt(text.replace(/[^0-9]/g, ''), 10); // Extract digits only
-
-        if (isNaN(predictedNumber)) {
-            console.warn("AI did not return a valid number for user prediction. Raw:", text);
-            // Fallback: maybe return current active count or null/undefined?
-            return currentActiveCount; // Or handle error differently
-        }
-
-        // Basic sanity check (prediction shouldn't exceed current active users)
-        return Math.min(predictedNumber, currentActiveCount);
-
-    } catch (error) {
-        console.error("Error calling AI Service for user prediction:", error);
-        // Fallback or re-throw
-        return currentActiveCount; // Return current count as a safe fallback
-        // Or: throw new Error("Failed to generate AI user retention prediction.");
-    }
+    return currentActiveCount;
 }
-
 
 module.exports = {
+    performAdvancedAnalysis,
     generateFinancialInsights,
     generateDetailedAIRecommendations,
-    predictRetainedUsers // Export the new function
+    predictRetainedUsers
 };

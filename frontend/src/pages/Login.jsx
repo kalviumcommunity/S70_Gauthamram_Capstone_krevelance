@@ -4,6 +4,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Layout from "../components/layout/Layout";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,8 +17,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
-
-  const API_URL = "https://s70-gauthamram-capstone-krevelance-1.onrender.com/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +39,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
       });
@@ -64,7 +64,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/auth/google`;
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
   return (

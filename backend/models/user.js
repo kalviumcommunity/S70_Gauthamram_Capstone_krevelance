@@ -10,8 +10,8 @@ const UserSchema = new mongoose.Schema(
 
     name: {
       type: String,
-      required: [true, "Please provide a name"],
-      trim: true, 
+      trim: true,
+      default: "User"
     },
     email: {
       type: String,
@@ -21,31 +21,31 @@ const UserSchema = new mongoose.Schema(
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
         "Please provide a valid email",
       ],
-      lowercase: true, 
+      lowercase: true,
       trim: true,
-      canChange: { type: Boolean, default: false } 
+      canChange: { type: Boolean, default: false }
     },
     password: {
       type: String,
-     required: function() {
-      return !this.googleId;
-    },
-    minlength: 8,
-    select: false,
+      required: function () {
+        return !this.googleId;
+      },
+      minlength: 8,
+      select: false,
     },
     googleId: {
-    type: String,
-    unique: true,
-    sparse: true 
-  },
-    
-    businessSector: { 
-        type: String,
-        required: [true, "Please select your business sector"],
-        enum: {
-            values: ALLOWED_SECTORS,
-            message: 'Invalid business sector selected. Please choose from the provided list.'
-        }
+      type: String,
+      unique: true,
+      sparse: true
+    },
+
+    businessSector: {
+      type: String,
+      required: [true, "Please select your business sector"],
+      enum: {
+        values: ALLOWED_SECTORS,
+        message: 'Invalid business sector selected. Please choose from the provided list.'
+      }
     },
 
 
@@ -55,59 +55,64 @@ const UserSchema = new mongoose.Schema(
       enum: ['free', 'pro', 'enterprise'],
       default: 'free'
     },
-     company: {
-        type: String,
-        trim: true,
-        default: '',
+    company: {
+      type: String,
+      trim: true,
+      default: '',
     },
     phone: {
-        type: String,
-        trim: true,
-        default: '',
+      type: String,
+      trim: true,
+      default: '',
+    },
+    gstin: {
+      type: String,
+      trim: true,
+      default: '',
     },
     address: {
-        street: { type: String, trim: true, default: '' },
-        city: { type: String, trim: true, default: '' },
-        state: { type: String, trim: true, default: '' },
-        zip: { type: String, trim: true, default: '' },
-        country: { type: String, trim: true, default: '' }, 
-       
+      street: { type: String, trim: true, default: '' },
+      city: { type: String, trim: true, default: '' },
+      state: { type: String, trim: true, default: '' },
+      zip: { type: String, trim: true, default: '' },
+      country: { type: String, trim: true, default: '' },
+      countryCode: { type: String, trim: true, default: '' },
     },
 
 
     //BILLING
     currentPlan: {
-        type: String,
-        enum: ['free', 'pro', 'enterprise', null], 
-        default: 'free', 
+      type: String,
+      enum: ['free', 'pro', 'enterprise', null],
+      default: 'free',
     },
-    razorpayCustomerId: { 
-        type: String,
-        trim: true,
+    razorpayCustomerId: {
+      type: String,
+      trim: true,
     },
-    razorpaySubscriptionId: { 
-        type: String,
-        trim: true,
+    razorpaySubscriptionId: {
+      type: String,
+      trim: true,
     },
     subscriptionStatus: {
-        type: String,
-        enum: ['created', 'active', 'inactive', 'cancelled', 'past_due', null],
-        default: null,
+      type: String,
+      enum: ['created', 'active', 'inactive', 'cancelled', 'past_due', null],
+      default: null,
     },
     nextBillingDate: {
-        type: Date,
+      type: Date,
     },
     profileLockedFields: {
-        name: { type: Boolean, default: false }, 
-        email: { type: Boolean, default: true }, 
-      },
+      name: { type: Boolean, default: false },
+      email: { type: Boolean, default: true },
+    },
     createdAt: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
     updatedAt: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
   },
   {
@@ -130,9 +135,9 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-   if (!this.password) return false; 
-   return await bcrypt.compare(enteredPassword, this.password);
+  if (!this.password) return false;
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.models.User || mongoose.model("User", UserSchema);
 module.exports.ALLOWED_SECTORS = ALLOWED_SECTORS; 

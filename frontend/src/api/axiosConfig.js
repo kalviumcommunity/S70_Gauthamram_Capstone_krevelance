@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
 const api = axios.create({
-  baseURL: 'https://s70-gauthamram-capstone-krevelance-1.onrender.com/api', 
+  baseURL: `${API_BASE_URL}/api`, 
 });
 
 api.interceptors.request.use(

@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Upload as UploadIcon, File, CheckCircle, AlertCircle, X, FileText } from 'lucide-react';
 import Navbar1 from '../components/layout/Navbar1';
+import api from '../api/axiosConfig';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Badge = ({ className, variant, ...props }) => {
     let baseClasses = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
@@ -35,9 +38,10 @@ const Upload = () => {
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({});
     const [uploadStatus, setUploadStatus] = useState({});
+    const [fileTypes, setFileTypes] = useState({}); 
     const fileInputRef = useRef(null);
-    const dropZoneRef = useRef(null); 
- 
+    const dropZoneRef = useRef(null);
+
     const handleFileChange = (e) => {
 
         if (e.target.files) {
@@ -49,13 +53,13 @@ const Upload = () => {
     const handleNewFiles = (newFiles) => {
         const filteredFiles = newFiles.filter(file => file.size / 1024 / 1024 <= MAX_FILE_SIZE_MB);
         const rejectedFiles = newFiles.filter(file => file.size / 1024 / 1024 > MAX_FILE_SIZE_MB);
-        
-        if (rejectedFiles.length > 0) {
-        alert("Some files were too large and not added.");
-         }
 
-         const uniqueNewFiles = newFiles.filter(
-         (newFile) => !files.some((existingFile) => existingFile.name === newFile.name)
+        if (rejectedFiles.length > 0) {
+            alert("Some files were too large and not added.");
+        }
+
+        const uniqueNewFiles = newFiles.filter(
+            (newFile) => !files.some((existingFile) => existingFile.name === newFile.name)
         );
         const newProgress = { ...uploadProgress };
         const newStatus = { ...uploadStatus };
@@ -82,46 +86,63 @@ const Upload = () => {
         setUploadStatus(newStatus);
     };
 
-    const uploadFiles = () => {
+    const uploadFiles = async () => {
         if (files.length === 0) {
-            alert("Please select at least one file to upload.");
+            toast.error("Please select at least one file to upload.");
             return;
         }
 
         setUploading(true);
 
-        files.forEach(file => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 10) + 5;
-
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-
-                    setUploadStatus(prev => ({
-                        ...prev,
-                        [file.name]: Math.random() > 0.1 ? 'success' : 'error'
-                    }));
-                    setTimeout(() => {
-                        setUploadStatus(currentStatus => {
-                            const allDone = Object.values(currentStatus).every(
-                                status => status === 'success' || status === 'error'
-                            );
-                            if (allDone && Object.keys(currentStatus).length === files.length) {
-                                setUploading(false);
-                            }
-                            return currentStatus;
-                        });
-                    }, 500);
+        try {
+            for (const file of files) {
+                // Skip files that are already uploaded successfully
+                if (uploadStatus[file.name] === 'success') {
+                    console.log(`Skipping ${file.name}, already uploaded.`);
+                    continue;
                 }
 
-                setUploadProgress(prev => ({
-                    ...prev,
-                    [file.name]: progress > 100 ? 100 : progress
-                }));
-            }, 300);
-        });
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('documentType', fileTypes[file.name] || 'other'); // Send type
+
+                setUploadStatus(prev => ({ ...prev, [file.name]: 'pending' }));
+                setUploadProgress(prev => ({ ...prev, [file.name]: 10 }));
+
+                try {
+                    await api.post('/analysis/upload', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                        onUploadProgress: (progressEvent) => {
+                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            setUploadProgress(prev => ({ ...prev, [file.name]: percentCompleted }));
+                        }
+                    });
+
+                    setUploadStatus(prev => ({ ...prev, [file.name]: 'success' }));
+                    toast.success(`Successfully uploaded ${file.name}`);
+                } catch (error) {
+                    console.error(`Error uploading ${file.name}`, error);
+                    let errorMsg = `Failed to upload ${file.name}`;
+
+                    if (error.response && error.response.status === 409) {
+                        errorMsg = `${file.name} already exists.`;
+                        setUploadStatus(prev => ({ ...prev, [file.name]: 'success' })); // Mark as success so we don't retry? Or 'error'? 
+                        // User requested: "tell there is a file already".
+                        // Let's mark it as error but specific one.
+                        setUploadStatus(prev => ({ ...prev, [file.name]: 'error' }));
+                        toast.warning(errorMsg);
+                    } else {
+                        setUploadStatus(prev => ({ ...prev, [file.name]: 'error' }));
+                        toast.error(errorMsg);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Upload process error", error);
+            toast.error("An error occurred during the upload process.");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const getFileIcon = (fileName) => {
@@ -180,9 +201,9 @@ const Upload = () => {
                     </div>
 
                     {files.length > 0 && (
-                        
+
                         <div className="mb-6">
-                        
+
                             <h3 className="text-lg font-medium text-white mb-4">Selected Files ({files.length})</h3>
                             <div className="space-y-3">
                                 {files.map((file, index) => (
@@ -194,6 +215,22 @@ const Upload = () => {
                                                     <p className="text-white font-medium">{file.name}</p>
                                                     <p className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                                                 </div>
+                                            </div>
+
+                                            {/* Document Type Selector */}
+                                            <div className="mx-4">
+                                                <select
+                                                    className="bg-white/5 border border-white/10 rounded text-sm text-gray-300 p-1 focus:border-[#0FCE7C] outline-none"
+                                                    value={fileTypes[file.name] || 'other'}
+                                                    onChange={(e) => setFileTypes(prev => ({ ...prev, [file.name]: e.target.value }))}
+                                                    disabled={uploadStatus[file.name] === 'success'}
+                                                >
+                                                    <option value="other">General / Other</option>
+                                                    <option value="audit">Audit Report</option>
+                                                    <option value="tax">Tax Return</option>
+                                                    <option value="bank">Bank Statement</option>
+                                                    <option value="details">Business Details</option>
+                                                </select>
                                             </div>
 
                                             <div className="flex items-center space-x-3">
@@ -242,15 +279,15 @@ const Upload = () => {
                         >
                             Add More Files
                         </button>
-                        <button 
-                        className="text-sm bg-red-600 hover:scale-105 px-2 h-10 text-white rounded-lg -ml-110 mt-1"
-                        onClick={() => {
-                        setFiles([]);
-                         setUploadProgress({});
-                         setUploadStatus({});
-                         }}
+                        <button
+                            className="text-sm bg-red-600 hover:scale-105 px-2 h-10 text-white rounded-lg -ml-110 mt-1"
+                            onClick={() => {
+                                setFiles([]);
+                                setUploadProgress({});
+                                setUploadStatus({});
+                            }}
                         >
-                         Clear All Files
+                            Clear All Files
                         </button>
 
                         <button
@@ -285,6 +322,7 @@ const Upload = () => {
                     </ul>
                 </div>
             </div>
+            <ToastContainer />
         </div>
 
     );

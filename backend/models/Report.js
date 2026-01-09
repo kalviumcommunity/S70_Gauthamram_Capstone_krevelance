@@ -5,6 +5,11 @@ const reportSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     description: String,
     date: {
         type: Date,
@@ -12,7 +17,7 @@ const reportSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['financial', 'analysis', 'forecast', 'tax', 'other'], 
+        enum: ['financial', 'analysis', 'forecast', 'tax', 'other'],
         required: true
     },
     status: {

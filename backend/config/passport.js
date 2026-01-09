@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+    expiresIn: '6h',
   });
 };
 
@@ -19,7 +19,7 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
       session: false,
       passReqToCallback: true,
-    }, 
+    },
     async (req, accessToken, refreshToken, profile, done) => {
       try {
         const existingUser = await User.findOne({
